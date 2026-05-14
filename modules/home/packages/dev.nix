@@ -1,31 +1,11 @@
 { pkgs, username, ... }:
 {
   home-manager.users.${username} = {
-    home.packages = with pkgs; [
-      ## Lsp
-      nixd # nix
+    home.packages = [
+      ## LSP
+      pkgs.nixd # Nix
 
-      ## C / C++
-#       gcc
-#       gdb
-#       cmake
-#
-#       ncurses
-
-      ## Python
-#       python3
-
-      ## Docker
-#       docker
-#       docker-buildx
-
-      # Windows partition support
-#       ntfs3g
-#
-#       appimage-run
-#       power-profiles-daemon
-
-        github-desktop
+      pkgs.github-desktop
     ];
   };
 }

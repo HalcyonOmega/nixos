@@ -25,11 +25,13 @@
       # Better Core Utils
       bat
       ripgrep # Grep Replacement
-      tldr
+      tealdeer
       eza
       fzf
       zoxide
       yazi
+      # fresh-editor (implement with unstable?)
+      starship
 
       # Monitoring / Fetch
       btop
