@@ -14,7 +14,6 @@
     ./program.nix
     ./sched-ext.nix
     ./security.nix
-    ./steam.nix
     ./system.nix
     ./user.nix
     ./virtualization.nix
