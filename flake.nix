@@ -25,11 +25,11 @@
 
     ghostty.url = "github:ghostty-org/ghostty";
 
-    # vicinae.url = "github:vicinaehq/vicinae";
-    # vicinae-extensions = {
-    #   url = "github:vicinaehq/extensions";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    vicinae.url = "github:vicinaehq/vicinae";
+    vicinae-extensions = {
+      url = "github:vicinaehq/extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
   };
 
@@ -103,7 +103,7 @@
                 plasma-manager.homeManagerModules.plasma-manager
                 nixcord.homeModules.nixcord
                 nix-flatpak.homeManagerModules.nix-flatpak
-                # vicinae.homeManagerModules.default
+                vicinae.homeManagerModules.default
               ];
               home-manager.extraSpecialArgs = {
                 inherit
