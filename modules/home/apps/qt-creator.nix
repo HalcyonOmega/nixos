@@ -1,14 +1,14 @@
 { pkgs, username, ... }:
 {
   home-manager.users.${username} = {
-    home.packages = with pkgs; [
-      qtcreator
-      libGL
-      cmake
-      gcc
-      libigl
-      qt6.qtbase
-      qt6.qtdeclarative
+    home.packages = [
+      pkgs.qtcreator
+      pkgs.libGL
+      pkgs.cmake
+      pkgs.gcc
+      pkgs.libigl
+      pkgs.qt6.qtbase
+      pkgs.qt6.qtdeclarative
     ];
   };
 }

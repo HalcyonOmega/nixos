@@ -1,28 +1,28 @@
 { pkgs, username, ... }:
 {
   home-manager.users.${username} = {
-    home.packages = with pkgs; [
-      bibata-cursors
-      whitesur-icon-theme
+    home.packages = [
+      pkgs.bibata-cursors
+      pkgs.whitesur-icon-theme
       # Add X11 libraries for JavaFX and GUI applications
-      xorg.libX11
-      xorg.libXext
-      xorg.libXrender
-      xorg.libXtst
-      xorg.libXi
-      xorg.libXrandr
-      xorg.libXcursor
-      xorg.libXinerama
-      xorg.libXxf86vm
+      pkgs.xorg.libX11
+      pkgs.xorg.libXext
+      pkgs.xorg.libXrender
+      pkgs.xorg.libXtst
+      pkgs.xorg.libXi
+      pkgs.xorg.libXrandr
+      pkgs.xorg.libXcursor
+      pkgs.xorg.libXinerama
+      pkgs.xorg.libXxf86vm
       # Additional libraries that JavaFX might need
-      freetype
-      fontconfig
-      alsa-lib
-      cairo
-      glib
-      gtk3
-      pango
-      zlib
+      pkgs.freetype
+      pkgs.fontconfig
+      pkgs.alsa-lib
+      pkgs.cairo
+      pkgs.glib
+      pkgs.gtk3
+      pkgs.pango
+      pkgs.zlib
     ];
 
     # Alternative xorg cursor configuration if needed

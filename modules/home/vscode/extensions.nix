@@ -29,9 +29,9 @@
         golang.go
         ms-vscode.cmake-tools
 
-        ## Color scheme
-        catppuccin.catppuccin-vsc-icons
-        catppuccin.catppuccin-vsc
+        ## Color Scheme
+        enkia.tokyo-night
+        # PKief.material-icon-theme
         llvm-vs-code-extensions.vscode-clangd
         # jdinhlife.gruvbox
         # jonathanharty.gruvbox-material-icon-theme

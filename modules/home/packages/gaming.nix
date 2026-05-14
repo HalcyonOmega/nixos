@@ -20,8 +20,7 @@
       # snes9x
       # yuzu
       # dolphin-emu
-      pcsx2
-      retroarch-free
+      # retroarch-free
     ];
   };
 }

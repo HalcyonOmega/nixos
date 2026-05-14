@@ -238,8 +238,6 @@ This configuration is inspired by and based on the following sources:
 
 - [nix-community/plasma-manager](https://github.com/nix-community/plasma-manager) — KDE Plasma configuration management for NixOSmanagement
 - [NixOS Community](https://nixos.org/): For the amazing NixOS ecosystem
-- [Catppuccin Mocha color theme](https://catppuccin.com/palette/): A dark theme with high contrast, used in my VSCode configuration
-- [Catppuccin Wallpapers submodule](https://github.com/zhichaoh/catppuccin-wallpaper): Collection of Catppuccin themed wallpapers.
 
 <!-- Links -->
 [KDE Plasma 6]: https://kde.org/plasma-desktop/
