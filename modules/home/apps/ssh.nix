@@ -1,4 +1,9 @@
-{ config, pkgs, username, ... }:
+{
+  config,
+  pkgs,
+  username,
+  ...
+}:
 {
   home-manager.users.${username} = {
     programs.ssh = {
@@ -19,7 +24,7 @@
         github = {
           host = "github.com";
           hostname = "ssh.github.com";
-          user = "Zolkyed";
+          user = "HalcyonOmega";
           port = 443;
           identityFile = "~/.ssh/id_github";
           identitiesOnly = true;
