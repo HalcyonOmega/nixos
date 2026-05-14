@@ -17,9 +17,9 @@
     xdg-desktop-portal-kde
     kcalc
     breeze-icons
-    # kdenlive
     filelight
-    plasma-browser-integration
+    # kdenlive
+    # plasma-browser-integration
   ];
 
   environment.plasma6.excludePackages = with pkgs.kdePackages; [
