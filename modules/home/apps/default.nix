@@ -1,8 +1,8 @@
 { ... }:
 {
   imports = [
-    ./cursor.nix
     ./bitwarden.nix
+    ./cursor.nix
     ./fastfetch.nix
     ./fonts.nix
     ./ghostty.nix
@@ -12,8 +12,11 @@
     ./logseq.nix
     ./nvim.nix
     ./qt-creator.nix
+    ./rofi.nix
+    ./solaar.nix
+    ./spotify.nix
     ./ssh.nix
-    ./vicinae.nix
+    # ./vicinae.nix
     ./vivaldi.nix
     ./xdg-mimes.nix
     ./xorg.nix

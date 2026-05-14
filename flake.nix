@@ -24,12 +24,19 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
     ghostty.url = "github:ghostty-org/ghostty";
+
+    # vicinae.url = "github:vicinaehq/vicinae";
+    # vicinae-extensions = {
+    #   url = "github:vicinaehq/extensions";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
   };
 
   outputs =
     {
-      nixpkgs,
       self,
+      nixpkgs,
       ...
     }@inputs:
     let
@@ -50,36 +57,38 @@
     in
     {
       nixosConfigurations = {
-        laptop = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = with inputs; [
-            ./hosts/laptop
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.backupFileExtension = "backup";
-              home-manager.useUserPackages = true;
-              home-manager.useGlobalPkgs = true;
-              home-manager.sharedModules = [
-                plasma-manager.homeManagerModules.plasma-manager
-                nixcord.homeModules.nixcord
-                nix-flatpak.homeManagerModules.nix-flatpak
-              ];
-              home-manager.extraSpecialArgs = {
-                inherit
-                  inputs
-                  username
-                  githubEmail
-                  githubUsername
-                  ;
-                host = "laptop";
-              };
-              home-manager.users.${username} = {
-                home.stateVersion = "25.11";
-              };
-            }
-          ];
-          specialArgs = commonArgs // { host = "laptop"; };
-        };
+        # laptop = nixpkgs.lib.nixosSystem {
+        #   inherit system;
+        #   modules = with inputs; [
+        #     ./hosts/laptop
+        #     home-manager.nixosModules.home-manager
+        #     {
+        #       home-manager.backupFileExtension = "backup";
+        #       home-manager.useUserPackages = true;
+        #       home-manager.useGlobalPkgs = true;
+        #       home-manager.sharedModules = [
+        #         plasma-manager.homeManagerModules.plasma-manager
+        #         nixcord.homeModules.nixcord
+        #         nix-flatpak.homeManagerModules.nix-flatpak
+        #       ];
+        #       home-manager.extraSpecialArgs = {
+        #         inherit
+        #           inputs
+        #           username
+        #           githubEmail
+        #           githubUsername
+        #           ;
+        #         host = "laptop";
+        #       };
+        #       home-manager.users.${username} = {
+        #         home.stateVersion = "25.11";
+        #       };
+        #     }
+        #   ];
+        #   specialArgs = commonArgs // {
+        #     host = "laptop";
+        #   };
+        # };
 
         desktop = nixpkgs.lib.nixosSystem {
           inherit system;
@@ -94,6 +103,7 @@
                 plasma-manager.homeManagerModules.plasma-manager
                 nixcord.homeModules.nixcord
                 nix-flatpak.homeManagerModules.nix-flatpak
+                # vicinae.homeManagerModules.default
               ];
               home-manager.extraSpecialArgs = {
                 inherit
@@ -109,7 +119,9 @@
               };
             }
           ];
-          specialArgs = commonArgs // { host = "desktop"; };
+          specialArgs = commonArgs // {
+            host = "desktop";
+          };
         };
       };
     };
