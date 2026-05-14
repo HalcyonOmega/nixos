@@ -5,7 +5,8 @@
       ## LSP
       pkgs.nixd # Nix
 
-      pkgs.github-desktop
+      #A/O 14 MAY, github-desktop doesn't load
+      # pkgs.github-desktop
     ];
   };
 }

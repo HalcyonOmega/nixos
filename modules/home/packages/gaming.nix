@@ -1,19 +1,22 @@
 { pkgs, username, ... }:
 {
   home-manager.users.${username} = {
-    home.packages = with pkgs; [
+    home.packages = [
       ## Utils
-      gamemode
-      mangohud
-      goverlay
-      wine
-      winetricks
-      protontricks
-      protonup-qt
+      pkgs.gamemode
+
+      # Enable mangohud & goverlay for stats/metrics overlay on games
+      # pkgs.mangohud
+      # pkgs.goverlay
+
+      pkgs.wine
+      pkgs.winetricks
+      pkgs.protontricks
+      pkgs.protonup-qt
       # inputs.nix-gaming.packages.${pkgs.system}.wine-ge
 
       # mouse setup
-      piper
+      # piper
 
       ## Emulation
       # sameboy
