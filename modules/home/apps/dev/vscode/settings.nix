@@ -1,7 +1,7 @@
 { username, ... }:
 {
   home-manager.users.${username} = {
-    programs.vscode.profiles.default = {
+    programs.vscodium.profiles.default = {
       userSettings = {
         "clangd.path" =
           "/home/${username}/.config/Code/User/globalStorage/llvm-vs-code-extensions.vscode-clangd/install/20.1.8/clangd_20.1.8/bin/clangd";

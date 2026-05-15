@@ -13,12 +13,11 @@
 # in
 {
   home-manager.users.${username} = {
-    programs.vscode.profiles.default = {
+    programs.vscodium.profiles.default = {
       extensions = with pkgs.vscode-extensions; [
         ## Languages
         jnoortheen.nix-ide
         arrterian.nix-env-selector
-        github.copilot
         github.copilot-chat
         github.vscode-pull-request-github
         # openai.chatgpt

@@ -1,7 +1,7 @@
 { username, ... }:
 {
   home-manager.users.${username} = {
-    programs.vscode.profiles.default = {
+    programs.vscodium.profiles.default = {
       keybindings = [
         {
           key = "ctrl+s";

@@ -9,9 +9,9 @@
     flake = "/home/${username}/nixos";
   };
 
-  environment.systemPackages = with pkgs; [
-    nix-output-monitor
-    nvd
-    nixfmt-rfc-style
+  environment.systemPackages = [
+    pkgs.nix-output-monitor
+    pkgs.nvd
+    pkgs.nixfmt
   ];
 }

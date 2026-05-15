@@ -10,8 +10,8 @@
     programs.git = {
       enable = true;
 
-      userName = "${githubUsername}";
-      userEmail = "${githubEmail}";
+      user.name = "${githubUsername}";
+      user.email = "${githubEmail}";
 
       extraConfig = {
         init.defaultBranch = "main";
@@ -29,15 +29,17 @@
         core.excludesFile = "/home/${username}/.config/git/.gitignore";
       };
 
-      delta = {
-        enable = true;
-        options = {
-          line-numbers = true;
-          side-by-side = false;
-          diff-so-fancy = true;
-          navigate = true;
-        };
+    };
+
+    programs.delta = {
+      enable = true;
+      options = {
+        line-numbers = true;
+        side-by-side = false;
+        diff-so-fancy = true;
+        navigate = true;
       };
+      enableGitIntegration = true;
     };
 
     home.packages = [ pkgs.gh ]; # pkgs.git-lfs
