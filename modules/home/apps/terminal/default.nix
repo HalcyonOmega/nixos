@@ -5,5 +5,6 @@
     ./ghostty.nix
     ./git.nix
     ./ssh.nix
+    ./nvim.nix
   ];
 }

@@ -18,12 +18,16 @@
 
     nur.url = "github:nix-community/NUR";
 
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixcord.url = "github:kaylorben/nixcord";
 
     nix-gaming.url = "github:fufexan/nix-gaming";
 
     nix-flatpak.url = "github:gmodena/nix-flatpak";
-
     ghostty.url = "github:ghostty-org/ghostty";
 
     vicinae.url = "github:vicinaehq/vicinae";
@@ -105,6 +109,7 @@
                 nixcord.homeModules.nixcord
                 nix-flatpak.homeManagerModules.nix-flatpak
                 vicinae.homeManagerModules.default
+                stylix.homeManagerModules.stylix
               ];
               home-manager.extraSpecialArgs = {
                 inherit

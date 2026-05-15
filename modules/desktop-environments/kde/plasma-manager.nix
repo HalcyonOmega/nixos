@@ -246,7 +246,7 @@
           powerButtonAction = "lockScreen";
           autoSuspend = {
             action = "sleep";
-            idleTimeout = 1000;
+            idleTimeout = 3600;
           };
           turnOffDisplay = {
             idleTimeout = 1000;
@@ -271,7 +271,7 @@
 
       kscreenlocker = {
         lockOnResume = true;
-        timeout = 10;
+        timeout = 60;
       };
 
       #
