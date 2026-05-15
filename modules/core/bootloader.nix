@@ -10,7 +10,6 @@
     # initrd.systemd.enable = true;
     # initrd.verbose = false;
     supportedFilesystems = [
-      "ntfs"
       "btrfs"
     ];
     consoleLogLevel = 0;
@@ -25,10 +24,10 @@
     ];
     plymouth = {
       enable = true;
-      theme = "deus_ex";
+      theme = "ironman";
       logo = "${pkgs.nixos-icons}/share/icons/hicolor/64x64/apps/nix-snowflake.png";
       themePackages = [
-        (pkgs.adi1090x-plymouth-themes.override { selected_themes = [ "deus_ex" ]; })
+        (pkgs.adi1090x-plymouth-themes.override { selected_themes = [ "ironman" ]; })
       ];
     };
     tmp = {

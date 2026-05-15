@@ -8,7 +8,6 @@
     ./kde.nix
     ./mouse.nix
     ./network.nix
-    ./nh.nix
     ./nvidia.nix
     ./pipewire.nix
     ./program.nix

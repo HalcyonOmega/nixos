@@ -1,10 +1,36 @@
 { pkgs, username, ... }:
 {
+  services = {
+    xserver = {
+      enable = true;
+      xkb.layout = "us";
+    };
+    displayManager.sddm.enable = true;
+    displayManager.sddm.settings.General.DisplayServer = "wayland";
+    displayManager.sddm.wayland.enable = true;
+    desktopManager.plasma6.enable = true;
+  };
+
+  programs.kdeconnect.enable = true;
+
+  environment.systemPackages = with pkgs.kdePackages; [
+    xdg-desktop-portal-kde
+    kcalc
+    breeze-icons
+    filelight
+    # kdenlive
+    # plasma-browser-integration
+  ];
+
+  environment.plasma6.excludePackages = with pkgs.kdePackages; [
+    elisa
+  ];
+
   home-manager.users.${username} = {
-    home.packages = with pkgs; [
+    home.packages = [
       # Other useful packages
-      bibata-cursors
-      whitesur-icon-theme
+      pkgs.bibata-cursors
+      pkgs.whitesur-icon-theme
     ];
 
     programs.plasma = {
@@ -64,7 +90,7 @@
             {
               iconTasks = {
                 launchers = [
-                  "applications:librewolf.desktop"
+                  "applications:vivaldi.desktop"
                 ];
                 behavior.showTasks = {
                   onlyInCurrentActivity = false;
@@ -291,26 +317,6 @@
           "Switch Window Left" = "Meta+H";
           "Switch Window Right" = "Meta+L";
           "Switch Window Up" = "Meta+K";
-          # Switch to desktop 1-9 using Meta+1-9
-          "Switch to Desktop 1" = "Meta+1";
-          "Switch to Desktop 2" = "Meta+2";
-          "Switch to Desktop 3" = "Meta+3";
-          "Switch to Desktop 4" = "Meta+4";
-          "Switch to Desktop 5" = "Meta+5";
-          "Switch to Desktop 6" = "Meta+6";
-          "Switch to Desktop 7" = "Meta+7";
-          "Switch to Desktop 8" = "Meta+8";
-          "Switch to Desktop 9" = "Meta+9";
-          # Switch windows to desktop 1-9 using Meta+Shift+1-9
-          "Switch Window to Desktop 1" = "Meta+Shift+1";
-          "Switch Window to Desktop 2" = "Meta+Shift+2";
-          "Switch Window to Desktop 3" = "Meta+Shift+3";
-          "Switch Window to Desktop 4" = "Meta+Shift+4";
-          "Switch Window to Desktop 5" = "Meta+Shift+5";
-          "Switch Window to Desktop 6" = "Meta+Shift+6";
-          "Switch Window to Desktop 7" = "Meta+Shift+7";
-          "Switch Window to Desktop 8" = "Meta+Shift+8";
-          "Switch Window to Desktop 9" = "Meta+Shift+9";
           # Show all windows on the current desktop using Meta+Tab
           "Toggle Overview" = "Meta+Tab";
           # Quit the current application using Meta+W
@@ -325,9 +331,7 @@
         baloofilerc."Basic Settings"."Indexing-Enabled" = false;
         kwinrc."org.kde.kdecoration2".ButtonsOnLeft = "SF";
         kwinrc.Desktops.Number = {
-          value = 9;
-          # Forces kde to not change this value (even through the settings app).
-          immutable = true;
+          value = 1;
         };
         kscreenlockerrc = {
           Greeter.WallpaperPlugin = "org.kde.potd";

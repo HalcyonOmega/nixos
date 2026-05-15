@@ -10,6 +10,7 @@
     ./fzf.nix
     ./git.nix
     ./helix.nix
+    ./nh.nix
     ./nitch.nix
     ./openssl.nix
     ./rar.nix

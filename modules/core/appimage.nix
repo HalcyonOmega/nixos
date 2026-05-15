@@ -11,7 +11,7 @@
       ];
     };
   };
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = [
     pkgs.appimage-run
   ];
 }

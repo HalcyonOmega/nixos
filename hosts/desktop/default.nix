@@ -18,7 +18,4 @@
     LC_TELEPHONE = "en_US.UTF-8";
     LC_TIME = "en_US.UTF-8";
   };
-
-  # @Nate TODO: Figure out how to relocate to ssh.nix file
-  # services.openssh.enable = true;
 }
