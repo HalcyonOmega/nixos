@@ -100,7 +100,7 @@
         desktop = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = with inputs; [
-            .modules/hosts/desktop
+            ./modules/hosts/desktop
             # stylix.nixosModules.stylix
             home-manager.nixosModules.home-manager
             {

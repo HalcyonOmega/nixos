@@ -3,6 +3,6 @@
     ./core
     ./desktop-environments
     ./home
-    ./hosts
+    # ./hosts
   ];
 }

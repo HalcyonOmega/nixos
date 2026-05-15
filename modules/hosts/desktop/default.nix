@@ -2,7 +2,7 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./../../modules
+    ./..
   ];
 
   time.timeZone = "America/New_York";
