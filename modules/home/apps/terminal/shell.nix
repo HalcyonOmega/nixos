@@ -34,9 +34,11 @@
   # nix.settings.allowed-users = [ "${username}" ];
 
   home-manager.users.${username} = {
-    home.packages = [
-      pkgs.ghostty
-    ];
+    # home.packages = [
+    #   pkgs.fish
+    # ];
+
+    shell = pkgs.fish;
 
     environment.shellAliases = {
       l = "ls -lh --color=auto";
@@ -58,9 +60,6 @@
       "libvirtd"
       "mlocate"
     ];
-
-    shell = pkgs.fish;
-    programs.fish.enable = true;
 
     initialPassword = "password";
 

@@ -22,8 +22,8 @@
     # plasma-browser-integration
   ];
 
-  environment.plasma6.excludePackages = with pkgs.kdePackages; [
-    elisa
+  environment.plasma6.excludePackages = [
+    pkgs.kdePackages.elisa
   ];
 
   home-manager.users.${username} = {

@@ -4,14 +4,14 @@
   # users.users.${username}.extraGroups = [ "libvirtd" ];
 
   # Install necessary packages
-  environment.systemPackages = with pkgs; [
-    virt-manager
-    virt-viewer
-    spice
-    spice-gtk
-    spice-protocol
-    virtio-win
-    win-spice
+  environment.systemPackages = [
+    pkgs.virt-manager
+    pkgs.virt-viewer
+    pkgs.spice
+    pkgs.spice-gtk
+    pkgs.spice-protocol
+    pkgs.virtio-win
+    pkgs.win-spice
   ];
 
   # Manage the virtualisation services
@@ -20,15 +20,6 @@
       enable = true;
       qemu = {
         swtpm.enable = true;
-        # ovmf = {
-        #   enable = true;
-        #   packages = [
-        #     (pkgs.OVMF.override {
-        #       secureBoot = true;
-        #       tpmSupport = true;
-        #     }).fd
-        #   ];
-        # };
       };
     };
     spiceUSBRedirection.enable = true;

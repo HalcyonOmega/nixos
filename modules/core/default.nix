@@ -8,7 +8,7 @@
     ./kde.nix
     ./mouse.nix
     ./network.nix
-    ./nvidia.nix
+    ./hardware.nix
     ./pipewire.nix
     ./program.nix
     ./sched-ext.nix

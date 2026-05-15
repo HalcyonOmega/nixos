@@ -1,7 +1,10 @@
 { ... }:
 {
   imports = [
-    ./ghostty.nix
     ./commands
+    ./shells
+
+    ./ghostty.nix
+    ./shell.nix
   ];
 }

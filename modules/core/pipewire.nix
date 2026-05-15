@@ -10,8 +10,8 @@
       # @Nate TODO: Consider adding
       # lowLatency.enable = true;
     };
-
-    hardware.alsa.enablePersistence = true;
-    environment.systemPackages = [ pkgs.pulseaudioFull ];
   };
+
+  hardware.alsa.enablePersistence = true;
+  environment.systemPackages = [ pkgs.pulseaudioFull ];
 }

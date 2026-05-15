@@ -1,11 +1,13 @@
 { ... }:
 {
-  programs.dconf.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-    # pinentryFlavor = "";
+  programs = {
+    dconf.enable = true;
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+      # pinentryFlavor = "";
+    };
+    nix-ld.enable = true;
+    # programs.nix-ld.libraries = with pkgs; [ ];
   };
-  programs.nix-ld.enable = true;
-  # programs.nix-ld.libraries = with pkgs; [ ];
 }
