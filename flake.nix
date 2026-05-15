@@ -64,43 +64,43 @@
     in
     {
       nixosConfigurations = {
-        laptop = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = with inputs; [
-            ./hosts/laptop
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.backupFileExtension = "backup";
-              home-manager.useUserPackages = true;
-              home-manager.useGlobalPkgs = true;
-              home-manager.sharedModules = [
-                plasma-manager.homeModules.plasma-manager
-                nixcord.homeModules.nixcord
-                nix-flatpak.homeManagerModules.nix-flatpak
-              ];
-              home-manager.extraSpecialArgs = {
-                inherit
-                  inputs
-                  username
-                  githubEmail
-                  githubUsername
-                  ;
-                host = "laptop";
-              };
-              home-manager.users.${username} = {
-                home.stateVersion = "25.11";
-              };
-            }
-          ];
-          specialArgs = commonArgs // {
-            host = "laptop";
-          };
-        };
+        # laptop = nixpkgs.lib.nixosSystem {
+        #   inherit system;
+        #   modules = with inputs; [
+        #     ./hosts/laptop
+        #     home-manager.nixosModules.home-manager
+        #     {
+        #       home-manager.backupFileExtension = "backup";
+        #       home-manager.useUserPackages = true;
+        #       home-manager.useGlobalPkgs = true;
+        #       home-manager.sharedModules = [
+        #         plasma-manager.homeModules.plasma-manager
+        #         nixcord.homeModules.nixcord
+        #         nix-flatpak.homeManagerModules.nix-flatpak
+        #       ];
+        #       home-manager.extraSpecialArgs = {
+        #         inherit
+        #           inputs
+        #           username
+        #           githubEmail
+        #           githubUsername
+        #           ;
+        #         host = "laptop";
+        #       };
+        #       home-manager.users.${username} = {
+        #         home.stateVersion = "25.11";
+        #       };
+        #     }
+        #   ];
+        #   specialArgs = commonArgs // {
+        #     host = "laptop";
+        #   };
+        # };
 
         desktop = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = with inputs; [
-            ./hosts/desktop
+            .modules/hosts/desktop
             # stylix.nixosModules.stylix
             home-manager.nixosModules.home-manager
             {
