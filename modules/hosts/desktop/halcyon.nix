@@ -12,7 +12,6 @@
   flake.nixosConfigurations.halcyon = inputs.nixpkgs.lib.nixosSystem {
     inherit system;
     modules = [
-      # self.nixosModules.moduleTemplate
       self.nixosModules.halcyonModule
       inputs.home-manager.nixosModules.home-manager
       {
@@ -35,7 +34,7 @@
           host = "halcyon";
         };
         home-manager.users.${username} = {
-          home.stateVersion = "25.11";
+          home.stateVersion = "26.05";
         };
       }
     ];
@@ -55,6 +54,40 @@
     }:
 
     {
+      # Standard Config Settings
+      time.timeZone = "America/New_York";
+      i18n.defaultLocale = "en_US.UTF-8";
+      i18n.extraLocaleSettings = {
+        LC_ADDRESS = "en_US.UTF-8";
+        LC_IDENTIFICATION = "en_US.UTF-8";
+        LC_MEASUREMENT = "en_US.UTF-8";
+        LC_MONETARY = "en_US.UTF-8";
+        LC_NAME = "en_US.UTF-8";
+        LC_NUMERIC = "en_US.UTF-8";
+        LC_PAPER = "en_US.UTF-8";
+        LC_TELEPHONE = "en_US.UTF-8";
+        LC_TIME = "en_US.UTF-8";
+      };
+
+      users.users.${username} = {
+        isNormalUser = true;
+        description = "${username}";
+        extraGroups = [
+          "networkmanager"
+          "wheel"
+          "libvirtd"
+          "mlocate"
+        ];
+        initialPassword = "password";
+      };
+
+      nix.settings.allowed-users = [ "${username}" ];
+      boot.loader.limine.enable = true;
+      system.stateVersion = "26.11";
+
+      ###
+      ### IMPORTANT! BEGIN hardware-configuration.nix
+      ###
       imports = [
         (modulesPath + "/installer/scan/not-detected.nix")
       ];
@@ -96,19 +129,8 @@
 
       nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
       hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-
-      time.timeZone = "America/New_York";
-      i18n.defaultLocale = "en_US.UTF-8";
-      i18n.extraLocaleSettings = {
-        LC_ADDRESS = "en_US.UTF-8";
-        LC_IDENTIFICATION = "en_US.UTF-8";
-        LC_MEASUREMENT = "en_US.UTF-8";
-        LC_MONETARY = "en_US.UTF-8";
-        LC_NAME = "en_US.UTF-8";
-        LC_NUMERIC = "en_US.UTF-8";
-        LC_PAPER = "en_US.UTF-8";
-        LC_TELEPHONE = "en_US.UTF-8";
-        LC_TIME = "en_US.UTF-8";
-      };
+      ###
+      ### IMPORTANT! END hardware-configuration.nix
+      ###
     };
 }
