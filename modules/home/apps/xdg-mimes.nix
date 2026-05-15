@@ -2,16 +2,16 @@
 with lib;
 let
   defaultApps = {
-    browser = [ "brave-browser.desktop" ];
+    browser = [ "vivaldi.desktop" ];
     text = [ "kate.desktop" ];
     image = [ "imv-dir.desktop" ];
     audio = [ "mpv.desktop" ];
     video = [ "mpv.desktop" ];
-    directory = [ "nautilus.desktop" ];
+    directory = [ "dolphin.desktop" ];
     office = [ "onlyoffice.desktop" ];
-    pdf = [ "org.gnome.Evince.desktop" ];
+    pdf = [ "okular.desktop" ];
     terminal = [ "ghostty.desktop" ];
-    archive = [ "org.gnome.FileRoller.desktop" ];
+    archive = [ "ark.desktop" ];
     discord = [ "discord.desktop" ];
   };
 

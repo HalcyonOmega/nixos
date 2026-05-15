@@ -3,8 +3,6 @@
   # User groups are managed in user.nix to avoid conflicts
   # users.users.${username}.extraGroups = [ "libvirtd" ];
 
-  virtualisation.waydroid.enable = true;
-
   # Install necessary packages
   environment.systemPackages = with pkgs; [
     virt-manager

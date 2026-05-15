@@ -42,6 +42,7 @@
     {
       self,
       nixpkgs,
+      stylix,
       ...
     }@inputs:
     let
@@ -99,6 +100,7 @@
           inherit system;
           modules = with inputs; [
             ./hosts/desktop
+            stylix.nixosModules.stylix
             home-manager.nixosModules.home-manager
             {
               home-manager.backupFileExtension = "backup";
@@ -109,7 +111,6 @@
                 nixcord.homeModules.nixcord
                 nix-flatpak.homeManagerModules.nix-flatpak
                 vicinae.homeManagerModules.default
-                stylix.homeManagerModules.stylix
               ];
               home-manager.extraSpecialArgs = {
                 inherit
