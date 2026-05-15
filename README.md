@@ -103,6 +103,7 @@ NixOS Rebuild (EXPAND)
 - ```nixos-rebuild test --flake .#host```    $\rightarrow$ Test configuration (reverts on reboot)
 - ```nixos-rebuild switch --flake .#host```  $\rightarrow$ Build and activate configuration
 - ```nixos-rebuild switch --rollback```      $\rightarrow$ Rollback to previous generation
+- ```nix run nixpkgs#nixos-generators -- --format iso --flake ~/nixos#ISO -o result``` $\rightarrow$ Build custom ISO for installing NixOS
 
 </details>
 

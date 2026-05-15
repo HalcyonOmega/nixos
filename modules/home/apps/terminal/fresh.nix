@@ -2,7 +2,7 @@
 {
   home-manager.users.${username} = {
     home.packages = [
-      pkgs.ghostty
+      pkgs.fresh-editor
     ];
   };
 }
