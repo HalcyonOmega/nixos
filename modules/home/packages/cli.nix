@@ -23,37 +23,20 @@
 
     home.packages = with pkgs; [
       # Better Core Utils
-      bat
-      ripgrep # Grep Replacement
-      tealdeer
-      eza
-      fzf
-      zoxide
-      yazi
-      # fresh-editor (implement with unstable?)
-      starship
+      # bat
+      # ripgrep # Grep Replacement
+      # tealdeer
+      # eza
+      # fzf
+      # zoxide
+      # yazi
+      # starship
 
-      # Monitoring / Fetch
-      btop
-      nitch # Nix Fastfetch
-      rar
-
-      # Fun / Screensaver
-      cmatrix
-
-      # Command history
-      # atuin
-
-      # Utilities
-      # yt-dlp-light
-      # ffmpeg
-      # killall
-      openssl
-      # pamixer # pulseaudio command line mixer
-      # unzip
-      # wget
-      # xdg-utils
-      # mlocate
+      # btop
+      # nitch
+      # rar
+      # cmatrix
+      # openssl
     ];
   };
 }
