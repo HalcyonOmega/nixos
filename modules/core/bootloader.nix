@@ -2,13 +2,17 @@
 {
   boot = {
     loader = {
-      systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
-      systemd-boot.configurationLimit = 5;
+      limine.enable = true;
+      # systemd-boot.enable = true;
+      # systemd-boot.configurationLimit = 5;
     };
-    initrd.systemd.enable = true;
-    initrd.verbose = false;
-    supportedFilesystems = [ "ntfs" ];
+    # initrd.systemd.enable = true;
+    # initrd.verbose = false;
+    supportedFilesystems = [
+      "ntfs"
+      "btrfs"
+    ];
     consoleLogLevel = 0;
     kernelParams = [
       "quiet"

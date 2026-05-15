@@ -100,7 +100,7 @@
           inherit system;
           modules = with inputs; [
             ./hosts/desktop
-            stylix.nixosModules.stylix
+            # stylix.nixosModules.stylix
             home-manager.nixosModules.home-manager
             {
               home-manager.backupFileExtension = "backup";
