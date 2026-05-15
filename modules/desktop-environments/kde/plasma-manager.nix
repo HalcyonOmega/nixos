@@ -5,26 +5,31 @@
       enable = true;
       xkb.layout = "us";
     };
-    displayManager.sddm.enable = true;
-    displayManager.sddm.settings.General.DisplayServer = "wayland";
-    displayManager.sddm.wayland.enable = true;
+
+    displayManager.sddm = {
+      enable = true;
+      settings.General.DisplayServer = "wayland";
+      wayland.enable = true;
+    };
     desktopManager.plasma6.enable = true;
   };
 
   programs.kdeconnect.enable = true;
 
-  environment.systemPackages = with pkgs.kdePackages; [
-    xdg-desktop-portal-kde
-    kcalc
-    breeze-icons
-    filelight
-    # kdenlive
-    # plasma-browser-integration
-  ];
+  environment = {
+    systemPackages = [
+      pkgs.kdePackages.xdg-desktop-portal-kde
+      pkgs.kdePackages.kcalc
+      pkgs.kdePackages.breeze-icons
+      pkgs.kdePackages.filelight
+      # kdenlive
+      # plasma-browser-integration
+    ];
 
-  environment.plasma6.excludePackages = [
-    pkgs.kdePackages.elisa
-  ];
+    plasma6.excludePackages = [
+      pkgs.kdePackages.elisa
+    ];
+  };
 
   home-manager.users.${username} = {
     home.packages = [
@@ -36,9 +41,7 @@
     programs.plasma = {
       enable = true;
 
-      #
       # Some high-level settings:
-      #
       workspace = {
         # clickItemTo = "open"; # If you liked the click-to-open default from plasma 5
         lookAndFeel = "org.kde.breezedark.desktop";

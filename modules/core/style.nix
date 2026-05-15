@@ -4,7 +4,6 @@
   inputs,
   ...
 }:
-
 {
   stylix = {
     enable = true;
