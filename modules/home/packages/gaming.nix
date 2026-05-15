@@ -2,13 +2,6 @@
 {
   home-manager.users.${username} = {
     home.packages = [
-      ## Utils
-      pkgs.gamemode
-
-      # Enable mangohud & goverlay for stats/metrics overlay on games
-      # pkgs.mangohud
-      # pkgs.goverlay
-
       pkgs.wine
       pkgs.winetricks
       pkgs.protontricks

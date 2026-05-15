@@ -1,6 +1,7 @@
 { pkgs, inputs, ... }:
 {
   # imports = [ inputs.nix-gaming.nixosModules.default ];
+  # @Nate TODO: Cleanup page
   nix = {
     settings = {
       auto-optimise-store = true;
@@ -28,11 +29,11 @@
     overlays = [ inputs.nur.overlays.default ];
   };
 
-  environment.systemPackages = with pkgs; [
-    wget
-    git
-    cmake
-  ];
+  # environment.systemPackages = with pkgs; [
+  #   wget
+  #   git
+  #   cmake
+  # ];
 
   nixpkgs.config.allowUnfree = true;
   boot.kernelPackages = pkgs.linuxPackages_zen;
