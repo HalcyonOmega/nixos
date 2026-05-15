@@ -9,11 +9,11 @@
   home-manager.users.${username} = {
     programs.git = {
       enable = true;
-
-      userName = "${githubUsername}";
-      userEmail = "${githubEmail}";
-
-      extraConfig = {
+      settings = {
+        user = {
+          name = "${githubUsername}";
+          email = "${githubEmail}";
+        };
         init.defaultBranch = "main";
         merge.conflictstyle = "diff3";
         diff.colorMoved = "default";

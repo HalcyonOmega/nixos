@@ -107,7 +107,7 @@
               home-manager.useUserPackages = true;
               home-manager.useGlobalPkgs = true;
               home-manager.sharedModules = [
-                plasma-manager.homeManagerModules.plasma-manager
+                plasma-manager.homeModules.plasma-manager
                 nixcord.homeModules.nixcord
                 nix-flatpak.homeManagerModules.nix-flatpak
                 vicinae.homeManagerModules.default

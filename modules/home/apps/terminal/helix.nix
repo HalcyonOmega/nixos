@@ -8,7 +8,7 @@
     programs.helix = {
       enable = true;
       settings = {
-        theme = "autumn_night_transparent";
+        theme = "tokyonight_transparent";
         editor.cursor-shape = {
           normal = "block";
           insert = "bar";
@@ -23,8 +23,8 @@
         }
       ];
       themes = {
-        autumn_night_transparent = {
-          "inherits" = "autumn_night";
+        tokyonight_transparent = {
+          "inherits" = "tokyonight";
           "ui.background" = { };
         };
       };
