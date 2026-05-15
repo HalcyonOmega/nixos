@@ -21,6 +21,7 @@
         github.copilot
         github.copilot-chat
         github.vscode-pull-request-github
+        # openai.chatgpt
         rust-lang.rust-analyzer
         # ms-python.python
         llvm-vs-code-extensions.vscode-clangd
@@ -33,8 +34,6 @@
         enkia.tokyo-night
         # PKief.material-icon-theme
         llvm-vs-code-extensions.vscode-clangd
-        # jdinhlife.gruvbox
-        # jonathanharty.gruvbox-material-icon-theme
       ];
     };
   };
