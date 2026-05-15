@@ -1,7 +1,7 @@
 { pkgs, inputs, ... }:
 {
   # imports = [ inputs.nix-gaming.nixosModules.default ];
-  # @Nate TODO: Cleanup page
+  # @Nate TODO: Cleanup page & consider adding CachyOS kernel
   nix = {
     settings = {
       auto-optimise-store = true;
@@ -27,15 +27,9 @@
   };
   nixpkgs = {
     overlays = [ inputs.nur.overlays.default ];
+    config.allowUnfree = true;
   };
 
-  # environment.systemPackages = with pkgs; [
-  #   wget
-  #   git
-  #   cmake
-  # ];
-
-  nixpkgs.config.allowUnfree = true;
   boot.kernelPackages = pkgs.linuxPackages_zen;
   system.stateVersion = "25.11";
 }

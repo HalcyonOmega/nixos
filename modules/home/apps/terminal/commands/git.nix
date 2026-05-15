@@ -7,6 +7,10 @@
 }:
 {
   home-manager.users.${username} = {
+    home.packages = [
+      pkgs.git
+      pkgs.gh
+    ];
     programs.git = {
       enable = true;
       settings = {
@@ -41,8 +45,6 @@
       };
       enableGitIntegration = true;
     };
-
-    home.packages = [ pkgs.gh ]; # pkgs.git-lfs
 
     xdg.configFile."git/.gitignore".text = ''
       .vscode

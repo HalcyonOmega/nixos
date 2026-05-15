@@ -2,7 +2,7 @@
 {
   imports = [
     ./cursor.nix
-    ./dev.nix
+    ./nixd.nix
     ./vscode
   ];
 }

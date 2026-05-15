@@ -20,5 +20,5 @@
   };
 
   # @Nate TODO: Figure out how to relocate to ssh.nix file
-  services.openssh.enable = true;
+  # services.openssh.enable = true;
 }
