@@ -14,7 +14,6 @@
         "editor.fontFamily" = "'NotoMono Nerd Font', 'monospace', monospace";
         "terminal.integrated.fontFamily" = "'NotoMono Nerd Font'";
         "editor.fontSize" = 18;
-        #use Mocha as the base
         workbench.colorTheme = "Tokyo Night";
 
         "vsicons.dontShowNewVersionMessage" = true;
