@@ -1,6 +1,6 @@
 { inputs, self, ... }:
 {
-  flake.nixosModules.bat =
+  flake.nixosModules.gaming =
     { ... }:
     {
       imports = [

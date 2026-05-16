@@ -4,6 +4,8 @@
     { ... }:
     {
       imports = [
+        self.nixosModules.nix-search
+
         self.nixosModules.bat
         self.nixosModules.btop
         self.nixosModules.cmatrix
