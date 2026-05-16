@@ -12,6 +12,7 @@
   flake.nixosConfigurations.halcyon = inputs.nixpkgs.lib.nixosSystem {
     inherit system;
     modules = [
+      (inputs.import-tree ./../../modules)
       self.nixosModules.halcyonModule
       self.nixosModules.apps
       inputs.home-manager.nixosModules.home-manager
