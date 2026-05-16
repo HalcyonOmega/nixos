@@ -4,7 +4,7 @@
     { pkgs, username, ... }:
     {
       home-manager.users.${username} = {
-        home.packages = [ pkgs.brave-browser ];
+        home.packages = [ pkgs.brave ];
       };
     };
 }
