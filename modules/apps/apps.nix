@@ -5,6 +5,7 @@
     {
       imports = [
         self.nixosModules.terminal
+        self.nixosModules.utilities
         self.nixosModules.flatpak
       ];
     };

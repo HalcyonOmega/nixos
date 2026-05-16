@@ -1,0 +1,14 @@
+{ inputs, ... }:
+{
+  flake.nixosModules.solaar =
+    {
+      pkgs,
+      username,
+      ...
+    }:
+    {
+      home-manager.users.${username} = {
+        home.packages = [ pkgs.solaar ];
+      };
+    };
+}

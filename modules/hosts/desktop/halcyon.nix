@@ -71,22 +71,19 @@
         LC_TIME = "en_US.UTF-8";
       };
 
-      users.users.${username} = {
-        isNormalUser = true;
-        description = "${username}";
-        extraGroups = [
-          "networkmanager"
-          "wheel"
-          "libvirtd"
-          "mlocate"
-        ];
-        initialPassword = "password";
-      };
+      # users.users.${username} = {
+      #   isNormalUser = true;
+      #   description = "${username}";
+      #   extraGroups = [
+      #     "networkmanager"
+      #     "wheel"
+      #     "libvirtd"
+      #     "mlocate"
+      #   ];
+      #   initialPassword = "password";
+      # };
 
-      nixpkgs.config.allowUnfree = true;
-      nix.settings.allowed-users = [ "${username}" ];
-      boot.loader.limine.enable = true;
-      system.stateVersion = "26.11";
+      # nix.settings.allowed-users = [ "${username}" ];
 
       ###
       ### IMPORTANT! BEGIN hardware-configuration.nix
