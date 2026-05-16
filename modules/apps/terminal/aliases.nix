@@ -9,6 +9,9 @@
         disk = "lsblk -f";
         ff = "fastfetch";
         nit = "nitch";
+        code = "codium";
+        nrs = "nh os switch";
+        nrb = "nh os build";
       };
     };
 }
