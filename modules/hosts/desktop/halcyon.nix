@@ -13,6 +13,7 @@
     inherit system;
     modules = [
       self.nixosModules.halcyonModule
+      self.nixosModules.apps
       inputs.home-manager.nixosModules.home-manager
       {
         home-manager.backupFileExtension = "backup";
@@ -52,7 +53,6 @@
       modulesPath,
       ...
     }:
-
     {
       # Standard Config Settings
       time.timeZone = "America/New_York";
