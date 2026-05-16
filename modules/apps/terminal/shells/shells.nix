@@ -4,7 +4,7 @@
     { ... }:
     {
       imports = [
-        # self.nixosModules.fish
+        self.nixosModules.fish
       ];
     };
 }

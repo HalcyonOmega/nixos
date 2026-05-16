@@ -16,7 +16,6 @@
         self.nixosModules.nh
         self.nixosModules.nitch
         self.nixosModules.openssl
-        self.nixosModules.rar
         self.nixosModules.ripgrep
         self.nixosModules.ssh
         self.nixosModules.starship

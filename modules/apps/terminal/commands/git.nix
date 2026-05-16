@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules.fzf =
+  flake.nixosModules.git =
     {
       pkgs,
       username,

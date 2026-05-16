@@ -12,8 +12,9 @@
   flake.nixosConfigurations.halcyon = inputs.nixpkgs.lib.nixosSystem {
     inherit system;
     modules = [
-      self.nixosModules.halcyonModule
+      self.nixosModules.halcyon
       self.nixosModules.apps
+      self.nixosModules.desktop-environments
       inputs.home-manager.nixosModules.home-manager
       {
         home-manager.backupFileExtension = "backup";
@@ -45,7 +46,7 @@
     };
   };
 
-  flake.nixosModules.halcyonModule =
+  flake.nixosModules.halcyon =
     {
       config,
       lib,
@@ -81,6 +82,7 @@
         initialPassword = "password";
       };
 
+      nixpkgs.config.allowUnfree = true;
       nix.settings.allowed-users = [ "${username}" ];
       boot.loader.limine.enable = true;
       system.stateVersion = "26.11";
