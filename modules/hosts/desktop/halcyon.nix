@@ -12,9 +12,10 @@
   flake.nixosConfigurations.halcyon = inputs.nixpkgs.lib.nixosSystem {
     inherit system;
     modules = [
-      self.nixosModules.halcyon
       self.nixosModules.apps
+      self.nixosModules.core
       self.nixosModules.desktop-environments
+      self.nixosModules.halcyon
       inputs.home-manager.nixosModules.home-manager
       {
         home-manager.backupFileExtension = "backup";
