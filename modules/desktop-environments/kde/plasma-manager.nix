@@ -365,6 +365,7 @@
             baloofilerc."Basic Settings"."Indexing-Enabled" = false;
             kcminputrc.Keyboard.NumLock = 0;
             kwinrc."org.kde.kdecoration2".ButtonsOnLeft = "SF";
+            kwinrc.ModifierOnlyShortcuts.Meta = "org.kde.kglobalaccel,/component/kwin,org.kde.kglobalaccel.Component,invokeShortcut,Overview";
             kwinrc.Desktops.Number = {
               value = 1;
             };

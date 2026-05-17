@@ -14,7 +14,7 @@
             background-opacity = 0.8;
             background-opacity-cells = true;
 
-            # font-family = config.fontProfiles.monospace.family;
+            font-family = "NotoSansM Nerd Font Mono";
             font-size = 13;
 
             cursor-style = "bar";

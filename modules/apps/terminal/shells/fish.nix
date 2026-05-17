@@ -8,7 +8,14 @@
           pkgs.fish
         ];
 
+        programs.fish = {
+          enable = true;
+          interactiveShellInit = ''
+            set fish_greeting
+          '';
+        };
       };
+
       programs.fish = {
         enable = true;
         useBabelfish = true;
