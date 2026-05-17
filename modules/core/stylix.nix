@@ -17,7 +17,7 @@
 
       stylix = {
         enable = true;
-        image = ./../../assets/wallpapers/hall_of_armor.jpg;
+        image = ./../../assets/wallpapers/mountain2.jpg;
         # targets.qt.platform = "kde";
         polarity = "dark";
 
