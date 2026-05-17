@@ -31,14 +31,16 @@
 
         plasma6.excludePackages = [
           pkgs.kdePackages.elisa
+          pkgs.kdePackages.discover
+          pkgs.kdePackages.kwalletmanager
         ];
       };
 
       home-manager.users.${username} = {
         home.packages = [
           # Other useful packages
-          pkgs.bibata-cursors
-          pkgs.whitesur-icon-theme
+          # pkgs.bibata-cursors
+          # pkgs.whitesur-icon-theme
           pkgs.phinger-cursors
           pkgs.atkinson-hyperlegible-next
         ];
@@ -51,10 +53,10 @@
             # clickItemTo = "open"; # If you liked the click-to-open default from plasma 5
             lookAndFeel = "org.kde.breezedark.desktop";
             cursor = {
-              theme = "Phinger-Cursors";
+              theme = "Phinger Cursors (dark)";
               size = 24;
             };
-            iconTheme = "WhiteSur";
+            iconTheme = "Breeze-Dark";
             # wallpaper = ../../assets/wallpapers/anime-nix-wallpaper.png;
           };
 
@@ -98,7 +100,7 @@
                 {
                   iconTasks = {
                     launchers = [
-                      "applications:vivaldi.desktop"
+                      # "applications:brave.desktop"
                     ];
                     behavior.showTasks = {
                       onlyInCurrentActivity = false;
