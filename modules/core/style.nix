@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules.stylix =
+  flake.nixosModules.style =
     {
       pkgs,
       config,
@@ -17,11 +17,16 @@
 
       stylix = {
         enable = true;
-        image = ./../../assets/wallpapers/mountain2.jpg;
-        # targets.qt.platform = "kde";
+        image = ./../../assets/wallpapers/vortex.jpg;
         polarity = "dark";
 
-        #     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+        targets = {
+          kde.enable = true;
+
+          qt.enable = false;
+        };
+
+        base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
         # base16Scheme = {
         #   system = "base16";
         #   name = "selenized-black";
@@ -88,6 +93,16 @@
             terminal = fontSize;
           };
         };
+      };
+
+      qt = {
+        enable = true;
+
+        # Current Home Manager supports "kde"; older configs may have used "kde6".
+        platformTheme.name = "kde";
+
+        # Force Breeze while debugging. Stylix KDE docs say Breeze is the compatible default.
+        style.name = "breeze";
       };
     };
 }

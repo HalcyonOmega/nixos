@@ -16,7 +16,7 @@
         self.nixosModules.program
         self.nixosModules.sched-ext
         self.nixosModules.security
-        self.nixosModules.stylix
+        self.nixosModules.style
         self.nixosModules.system
         self.nixosModules.user
         self.nixosModules.virtualization
