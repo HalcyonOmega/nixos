@@ -14,19 +14,12 @@
       fontSize = 11;
     in
     {
-
       stylix = {
         enable = true;
         image = ./../../assets/wallpapers/vortex.jpg;
         polarity = "dark";
 
-        targets = {
-          kde.enable = true;
-
-          qt.enable = false;
-        };
-
-        base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+        # base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
         # base16Scheme = {
         #   system = "base16";
         #   name = "selenized-black";
@@ -93,16 +86,6 @@
             terminal = fontSize;
           };
         };
-      };
-
-      qt = {
-        enable = true;
-
-        # Current Home Manager supports "kde"; older configs may have used "kde6".
-        platformTheme.name = "kde";
-
-        # Force Breeze while debugging. Stylix KDE docs say Breeze is the compatible default.
-        style.name = "breeze";
       };
     };
 }

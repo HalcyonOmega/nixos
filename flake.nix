@@ -37,6 +37,7 @@
       url = "github:vicinaehq/extensions";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
 
     brave-origin.url = "github:clementpoiret/brave-origin-flake";
   };

@@ -100,6 +100,15 @@
     {
       home-manager.users.${username} = {
         xdg.configFile."mimeapps.list".force = true;
+
+        # Begin - Try avoid collisions on nixos-rebuild switch
+        # xdg.configFile."gtk-3.0/settings.ini".force = true;
+        # xdg.configFile."gtk-3.0/gtk.css".force = true;
+        # xdg.configFile."gtk-4.0/settings.ini".force = true;
+        # xdg.configFile."gtk-4.0/gtk.css".force = true;
+        # xdg.configFile.".gtkrc-2.0".force = true;
+        # End - Try avoid collisions on nixos-rebuild switch
+
         xdg.mimeApps.enable = true;
         xdg.mimeApps.associations.added = associations;
         xdg.mimeApps.defaultApplications = associations;

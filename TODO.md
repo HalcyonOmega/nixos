@@ -22,3 +22,4 @@
 - Get Unreal Engine running
 - Setup email
 - Implement stable vs unstable package selection
+- Fix style broken by stylix

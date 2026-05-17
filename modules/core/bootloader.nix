@@ -27,10 +27,10 @@
         ];
         plymouth = {
           enable = true;
-          theme = lib.mkForce "ironman";
+          theme = lib.mkForce "hexagon_dots";
           logo = "${pkgs.nixos-icons}/share/icons/hicolor/64x64/apps/nix-snowflake.png";
           themePackages = [
-            (pkgs.adi1090x-plymouth-themes.override { selected_themes = [ "ironman" ]; })
+            (pkgs.adi1090x-plymouth-themes.override { selected_themes = [ "hexagon_dots" ]; })
           ];
         };
         tmp = {

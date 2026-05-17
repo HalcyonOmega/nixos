@@ -11,6 +11,7 @@
 
         displayManager.sddm = {
           enable = true;
+          autoNumlock = true;
           settings.General.DisplayServer = "wayland";
           wayland.enable = true;
         };
@@ -23,6 +24,8 @@
         systemPackages = [
           pkgs.kdePackages.xdg-desktop-portal-kde
           pkgs.kdePackages.kcalc
+          pkgs.kdePackages.breeze
+          pkgs.kdePackages.breeze-gtk
           pkgs.kdePackages.breeze-icons
           pkgs.kdePackages.filelight
           # kdenlive
@@ -38,15 +41,13 @@
 
       home-manager.users.${username} = {
         home.packages = [
-          # Other useful packages
-          # pkgs.bibata-cursors
-          # pkgs.whitesur-icon-theme
           pkgs.phinger-cursors
           pkgs.atkinson-hyperlegible-next
         ];
 
         programs.plasma = {
           enable = true;
+          # overrideConfig = true;
 
           # Some high-level settings:
           workspace = {
@@ -56,14 +57,34 @@
               theme = "Phinger Cursors (dark)";
               size = 24;
             };
-            iconTheme = "Breeze-Dark";
-            # wallpaper = ../../assets/wallpapers/anime-nix-wallpaper.png;
+            theme = "breeze-dark";
+            colorScheme = "BreezeDark";
+            iconTheme = "breeze-dark";
+            wallpaper = ./../../../assets/wallpapers/vortex.jpg;
           };
 
           hotkeys.commands."launch-konsole" = {
             name = "Launch Konsole";
             key = "Meta+Alt+K";
             command = "konsole";
+          };
+
+          hotkeys.commands."launch-terminal" = {
+            name = "Launch Terminal";
+            key = "Meta+Ctrl+Alt+Shift+T";
+            command = "ghostty";
+          };
+
+          hotkeys.commands."launch-file-browser" = {
+            name = "Launch File Browser";
+            key = "Meta+Ctrl+Alt+Shift+E";
+            command = "dolphin";
+          };
+
+          hotkeys.commands."toggle-vicinae" = {
+            name = "Toggle Vicinae";
+            key = "Meta+Ctrl+Alt+Shift+Space";
+            command = "vicinae toggle";
           };
 
           fonts = {
@@ -330,7 +351,10 @@
               # Show all windows on the current desktop using Meta+Tab
               "Toggle Overview" = "Meta+Tab";
               # Quit the current application using Meta+W
-              "Quit" = "Meta+W";
+              "Quit" = [
+                "Meta+W"
+                "Meta+Ctrl+Alt+Shift+Q"
+              ];
             };
           };
 
@@ -339,6 +363,7 @@
           #
           configFile = {
             baloofilerc."Basic Settings"."Indexing-Enabled" = false;
+            kcminputrc.Keyboard.NumLock = 0;
             kwinrc."org.kde.kdecoration2".ButtonsOnLeft = "SF";
             kwinrc.Desktops.Number = {
               value = 1;

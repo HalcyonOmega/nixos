@@ -22,6 +22,21 @@
         pkgs.vulkan-tools
       ];
 
+      services.keyd = {
+        enable = true;
+
+        keyboards.default = {
+          ids = [ "*" ];
+          settings = {
+            main = {
+              capslock = "overload(hyper, C-A-M-S-space)";
+            };
+
+            "hyper:C-A-M-S" = { };
+          };
+        };
+      };
+
       services.udev.extraRules = builtins.concatStringsSep "\n" [
         # rule for via firmware flashing
         ''
