@@ -38,6 +38,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    brave-origin.url = "github:clementpoiret/brave-origin-flake";
   };
 
   outputs =

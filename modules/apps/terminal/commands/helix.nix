@@ -11,7 +11,7 @@
         programs.helix = {
           enable = true;
           settings = {
-            theme = "tokyonight_transparent";
+            # theme = "tokyonight_transparent";
             editor.cursor-shape = {
               normal = "block";
               insert = "bar";

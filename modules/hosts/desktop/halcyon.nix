@@ -72,20 +72,6 @@
         LC_TIME = "en_US.UTF-8";
       };
 
-      # users.users.${username} = {
-      #   isNormalUser = true;
-      #   description = "${username}";
-      #   extraGroups = [
-      #     "networkmanager"
-      #     "wheel"
-      #     "libvirtd"
-      #     "mlocate"
-      #   ];
-      #   initialPassword = "password";
-      # };
-
-      # nix.settings.allowed-users = [ "${username}" ];
-
       ###
       ### IMPORTANT! BEGIN hardware-configuration.nix
       ###

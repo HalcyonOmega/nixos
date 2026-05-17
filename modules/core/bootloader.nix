@@ -1,7 +1,7 @@
 { inputs, ... }:
 {
   flake.nixosModules.bootloader =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     {
       boot = {
         loader = {
@@ -27,7 +27,7 @@
         ];
         plymouth = {
           enable = true;
-          theme = "ironman";
+          theme = lib.mkForce "ironman";
           logo = "${pkgs.nixos-icons}/share/icons/hicolor/64x64/apps/nix-snowflake.png";
           themePackages = [
             (pkgs.adi1090x-plymouth-themes.override { selected_themes = [ "ironman" ]; })

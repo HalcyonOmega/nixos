@@ -14,14 +14,14 @@
             "window.titleBarStyle" = "custom"; # needed otherwise vscode crashes, see https://github.com/NixOS/nixpkgs/issues/246509
 
             "window.menuBarVisibility" = "toggle";
-            "editor.fontFamily" = "'NotoMono Nerd Font', 'monospace', monospace";
-            "terminal.integrated.fontFamily" = "'NotoMono Nerd Font'";
+            # "editor.fontFamily" = "'NotoMono Nerd Font', 'monospace', monospace";
+            # "terminal.integrated.fontFamily" = "'NotoMono Nerd Font'";
             "editor.fontSize" = 18;
-            workbench.colorTheme = "Tokyo Night";
+            # workbench.colorTheme = "Tokyo Night";
 
             "vsicons.dontShowNewVersionMessage" = true;
             # "explorer.confirmDragAndDrop" = false;
-            "editor.fontLigatures" = true;
+            # "editor.fontLigatures" = true;
             "editor.minimap.enabled" = false;
             "workbench.startupEditor" = "none";
 

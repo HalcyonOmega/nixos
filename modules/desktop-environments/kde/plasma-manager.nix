@@ -39,6 +39,8 @@
           # Other useful packages
           pkgs.bibata-cursors
           pkgs.whitesur-icon-theme
+          pkgs.phinger-cursors
+          pkgs.atkinson-hyperlegible-next
         ];
 
         programs.plasma = {
@@ -49,8 +51,8 @@
             # clickItemTo = "open"; # If you liked the click-to-open default from plasma 5
             lookAndFeel = "org.kde.breezedark.desktop";
             cursor = {
-              theme = "Bibata-Modern-Ice";
-              size = 32;
+              theme = "Phinger-Cursors";
+              size = 24;
             };
             iconTheme = "WhiteSur";
             # wallpaper = ../../assets/wallpapers/anime-nix-wallpaper.png;
@@ -64,7 +66,7 @@
 
           fonts = {
             general = {
-              family = "Noto Sans";
+              family = "Atkinson Hyperlegible Next";
               pointSize = 12;
             };
           };

@@ -10,6 +10,8 @@
           pkgs.noto-fonts-cjk-serif
           pkgs.noto-fonts-cjk-sans
           pkgs.texlivePackages.symbol
+
+          pkgs.atkinson-hyperlegible-next
         ];
       };
     };
