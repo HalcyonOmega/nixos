@@ -10,6 +10,7 @@
           "networkmanager"
           "wheel"
           "libvirtd"
+          "podman"
           "mlocate"
         ];
         initialPassword = "password";
