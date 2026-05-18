@@ -361,10 +361,6 @@
               # Show all windows on the current desktop using Meta+Tab
               "Toggle Overview" = "Meta+Tab";
 
-              "Window Close" = [
-                "Alt+F4"
-                "Meta+Ctrl+Alt+Shift+Q"
-              ];
             };
           };
 

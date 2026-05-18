@@ -137,7 +137,7 @@ Custom Keybindings
 - ```Meta+L``` Switch Window Right
 - ```Meta+,``` Expose (Show all windows)
 - ```Meta+Tab``` Toggle Overview
-- ```Meta+W``` Quit Application
+- ```Hyper+Q``` Close Window (same as Alt+F4)
 
 ##### Virtual Desktops
 - ```Meta+1-9``` Switch to Desktop 1-9

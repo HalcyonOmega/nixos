@@ -3,9 +3,8 @@
 - Get CAC working
 <!-- - Get stylix working -->
 - Get cursor working
-- Setup hotkeys (KDE?)
+- Setup hotkeys (KDE?) - Caps Lock Hyper + Hyper+Q close window
 - Implement SOPS
-- Fix solaar not showing devices
 - Update readme
 - Look into disko
 - Look into optimizations from other nixos setups
