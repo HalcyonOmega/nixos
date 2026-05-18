@@ -2,8 +2,6 @@
 
 - Get CAC working
 <!-- - Get stylix working -->
-- Get cursor working
-- Setup hotkeys (KDE?) - Caps Lock Hyper + Hyper+Q close window
 - Implement SOPS
 - Update readme
 - Look into disko

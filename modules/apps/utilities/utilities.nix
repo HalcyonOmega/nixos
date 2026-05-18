@@ -11,6 +11,7 @@
         self.nixosModules.home-manager
         self.nixosModules.localsend
         self.nixosModules.solaar
+        self.nixosModules.streamcontroller
         self.nixosModules.vicinae
         self.nixosModules.xdg-mimes
         # self.nixosModules.xorg
