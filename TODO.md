@@ -1,10 +1,8 @@
 # Todo List
 
-- Fix numlock enable on lock screen & by default (KDE/SDDM?)
 - Get CAC working
 <!-- - Get stylix working -->
 - Get cursor working
-- Try CachyOS kernel/packages
 - Setup hotkeys (KDE?)
 - Implement SOPS
 - Fix solaar not showing devices
@@ -12,6 +10,7 @@
 - Update readme
 - Look into disko
 - Look into optimizations from other nixos setups
+- Get streamdeck working
 
 - Fix vivaldi
 - Look at redxtech/nix setup for Sunshine game streaming server
@@ -19,4 +18,3 @@
 - Get Unreal Engine running
 - Setup email
 - Implement stable vs unstable package selection
-- Fix style broken by stylix

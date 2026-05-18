@@ -1,7 +1,11 @@
 { inputs, ... }:
 {
   flake.nixosModules.cursor =
-    { pkgs, username, lib, ... }:
+    {
+      pkgs,
+      username,
+      ...
+    }:
     {
       home-manager.users.${username} = {
         programs.cursor = {
@@ -17,11 +21,6 @@
               "extensions.autoUpdate" = false;
               "editor.fontFamily" = "AtkynsonMono Nerd Font Mono";
               "terminal.integrated.fontFamily" = "AtkynsonMono Nerd Font Mono";
-              # Podman exposes the Docker-compatible CLI (dockerCompat + dockerSocket).
-              "dev.containers.dockerPath" = "/run/current-system/sw/bin/docker";
-              "dev.containers.dockerComposePath" = lib.getExe pkgs.docker-compose;
-              "remote.containers.dockerPath" = "/run/current-system/sw/bin/docker";
-              "remote.containers.dockerComposePath" = lib.getExe pkgs.docker-compose;
             };
           };
         };
