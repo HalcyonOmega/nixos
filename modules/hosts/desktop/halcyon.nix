@@ -72,6 +72,11 @@
         LC_TIME = "en_US.UTF-8";
       };
 
+      nexos.performance = {
+        kernel = "performance";
+        cachyosKernelCache = true;
+      };
+
       ###
       ### IMPORTANT! BEGIN hardware-configuration.nix
       ###

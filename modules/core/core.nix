@@ -7,8 +7,6 @@
         self.nixosModules.appimage
         self.nixosModules.bluetooth
         self.nixosModules.bootloader
-        self.nixosModules.flatpak
-        self.nixosModules.kde
         self.nixosModules.mouse
         self.nixosModules.network
         self.nixosModules.hardware

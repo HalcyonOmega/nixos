@@ -1,8 +1,15 @@
 { inputs, ... }:
 {
   flake.nixosModules.plasma-manager =
-    { pkgs, username, ... }:
     {
+      config,
+      pkgs,
+      username,
+      ...
+    }:
+    {
+      programs.ydotool.enable = true;
+
       services = {
         xserver = {
           enable = true;
@@ -12,8 +19,14 @@
         displayManager.sddm = {
           enable = true;
           autoNumlock = true;
-          settings.General.DisplayServer = "wayland";
-          wayland.enable = true;
+          settings.General = {
+            DisplayServer = "wayland";
+            Numlock = "on";
+          };
+          wayland = {
+            enable = true;
+            compositor = "kwin";
+          };
         };
         desktopManager.plasma6.enable = true;
       };

@@ -12,7 +12,6 @@
 - Get games working
 - Update readme
 - Look into disko
-- Setup starship
 - Install via/get keychron launcher working
 - Look into optimizations from other nixos setups
 

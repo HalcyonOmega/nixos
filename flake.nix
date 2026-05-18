@@ -28,6 +28,7 @@
     nixcord.url = "github:kaylorben/nixcord";
 
     nix-gaming.url = "github:fufexan/nix-gaming";
+    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
 
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     ghostty.url = "github:ghostty-org/ghostty";
