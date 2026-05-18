@@ -41,6 +41,11 @@
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
 
     brave-origin.url = "github:clementpoiret/brave-origin-flake";
+
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

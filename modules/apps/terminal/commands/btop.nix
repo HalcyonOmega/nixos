@@ -1,12 +1,26 @@
 { inputs, ... }:
 {
   flake.nixosModules.btop =
-    { pkgs, username, ... }:
+    {
+      pkgs,
+      username,
+      terminalTheme,
+      ...
+    }:
     {
       home-manager.users.${username} = {
-        home.packages = [
-          pkgs.btop
-        ];
+        programs.btop = {
+          enable = true;
+          package = pkgs.btop;
+
+          settings = {
+            color_theme = "reactor";
+            theme_background = false;
+            truecolor = true;
+          };
+
+          themes.reactor = terminalTheme.btop;
+        };
       };
     };
 }

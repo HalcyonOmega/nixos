@@ -2,7 +2,7 @@
 
 - Fix numlock enable on lock screen & by default (KDE/SDDM?)
 - Get CAC working
-- Get stylix working
+<!-- - Get stylix working -->
 - Get cursor working
 - Try CachyOS kernel/packages
 - Setup hotkeys (KDE?)
@@ -12,7 +12,6 @@
 - Get games working
 - Update readme
 - Look into disko
-- Install via/get keychron launcher working
 - Look into optimizations from other nixos setups
 
 - Fix vivaldi

@@ -8,7 +8,7 @@
         self.nixosModules.discord
         self.nixosModules.logseq
         self.nixosModules.onlyoffice
-        self.nixosModules.spotify
+        self.nixosModules.spicetify
         self.nixosModules.thunderbird
         self.nixosModules.vivaldi
       ];

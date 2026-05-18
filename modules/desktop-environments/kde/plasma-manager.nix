@@ -76,12 +76,6 @@
             wallpaper = ./../../../assets/wallpapers/vortex.jpg;
           };
 
-          hotkeys.commands."launch-konsole" = {
-            name = "Launch Konsole";
-            key = "Meta+Alt+K";
-            command = "konsole";
-          };
-
           hotkeys.commands."launch-terminal" = {
             name = "Launch Terminal";
             key = "Meta+Ctrl+Alt+Shift+T";
@@ -363,9 +357,9 @@
               "Switch Window Up" = "Meta+K";
               # Show all windows on the current desktop using Meta+Tab
               "Toggle Overview" = "Meta+Tab";
-              # Quit the current application using Meta+W
-              "Quit" = [
-                "Meta+W"
+
+              "Window Close" = [
+                "Alt+F4"
                 "Meta+Ctrl+Alt+Shift+Q"
               ];
             };

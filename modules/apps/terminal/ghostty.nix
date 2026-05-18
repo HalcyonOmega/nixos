@@ -1,7 +1,12 @@
 { inputs, ... }:
 {
   flake.nixosModules.ghostty =
-    { pkgs, username, ... }:
+    {
+      pkgs,
+      username,
+      terminalTheme,
+      ...
+    }:
     {
       home-manager.users.${username} = {
         home.packages = [ pkgs.ghostty ];
@@ -9,8 +14,7 @@
         programs.ghostty = {
           enable = true;
 
-          settings = {
-            theme = "Dracula";
+          settings = terminalTheme.ghostty // {
             background-opacity = 0.8;
             background-opacity-cells = true;
 
