@@ -4,9 +4,9 @@
     { ... }:
     {
       imports = [
-        self.nixosModules.brave-origin
         self.nixosModules.brave
         self.nixosModules.discord
+        self.nixosModules.librewolf
         self.nixosModules.logseq
         self.nixosModules.onlyoffice
         self.nixosModules.spicetify
