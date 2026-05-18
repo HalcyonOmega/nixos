@@ -9,6 +9,7 @@
         self.nixosModules.gparted
         self.nixosModules.gtk
         self.nixosModules.home-manager
+        self.nixosModules.localsend
         self.nixosModules.solaar
         self.nixosModules.vicinae
         self.nixosModules.xdg-mimes
