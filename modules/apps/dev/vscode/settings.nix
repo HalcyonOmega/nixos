@@ -16,7 +16,7 @@
             "window.menuBarVisibility" = "toggle";
             "terminal.integrated.fontFamily" = "NotoSansM Nerd Font Mono";
             "editor.fontSize" = 18;
-            # workbench.colorTheme = "Tokyo Night";
+            "workbench.colorTheme" = "Reactor";
 
             "vsicons.dontShowNewVersionMessage" = true;
             # "explorer.confirmDragAndDrop" = false;

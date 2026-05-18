@@ -7,7 +7,6 @@
 - Try CachyOS kernel/packages
 - Setup hotkeys (KDE?)
 - Implement SOPS
-- Try spicetify
 - Fix solaar not showing devices
 - Get games working
 - Update readme
