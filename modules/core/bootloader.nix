@@ -14,6 +14,7 @@
         # initrd.verbose = false;
         supportedFilesystems = [
           "btrfs"
+          "xfs"
         ];
         consoleLogLevel = 0;
         kernelParams = [
@@ -37,6 +38,7 @@
           useTmpfs = true;
           cleanOnBoot = true;
         };
+        zfs.forceImportRoot = false;
       };
     };
 }

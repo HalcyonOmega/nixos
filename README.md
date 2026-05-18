@@ -165,8 +165,8 @@ First install NixOS using any [graphical ISO image](https://nixos.org/download.h
 
 ```bash
 nix-shell -p git
-git clone https://github.com/HalcyonOmega/nixos.git
-cd nixos-kde-config
+git clone https://github.com/HalcyonOmega/nexos.git
+cd nexos
 ```
 
 #### 3. **Update hardware configuration**
