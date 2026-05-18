@@ -4,6 +4,7 @@
   inputs = {
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
 
@@ -59,6 +60,10 @@
       system = "x86_64-linux";
       githubUsername = "HalcyonOmega";
       githubEmail = "nathanbrown@me.com";
+      pkgs-stable = import inputs.nixpkgs-stable {
+        inherit system;
+        config.allowUnfree = true;
+      };
       commonArgs = {
         inherit
           self
@@ -67,6 +72,7 @@
           system
           githubUsername
           githubEmail
+          pkgs-stable
           ;
       };
     in

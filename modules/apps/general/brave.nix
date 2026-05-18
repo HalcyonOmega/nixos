@@ -8,11 +8,10 @@
     }:
     {
       home-manager.users.${username} = {
-        # home.packages = [ pkgs.brave ];
+        home.packages = [ pkgs.brave ];
 
         programs.brave = {
           enable = true;
-          # package = inputs.brave-origin.packages.${pkgs.system}.brave-origin-beta;
 
           commandLineArgs = [
             "--force-dark-mode"

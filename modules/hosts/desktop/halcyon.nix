@@ -3,6 +3,7 @@
   username,
   githubEmail,
   githubUsername,
+  pkgs-stable,
   commonArgs,
   system,
   self,
@@ -34,6 +35,7 @@
             username
             githubEmail
             githubUsername
+            pkgs-stable
             ;
           host = "halcyon";
         };
