@@ -6,7 +6,6 @@
 - Setup hotkeys (KDE?)
 - Implement SOPS
 - Fix solaar not showing devices
-- Get games working
 - Update readme
 - Look into disko
 - Look into optimizations from other nixos setups
