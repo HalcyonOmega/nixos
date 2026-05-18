@@ -42,7 +42,7 @@
 | **Network Management**      | [NetworkManager][NetworkManager] + [Plasma NetworkManager][Plasma NetworkManager] |
 | **System Monitor**          | [Mission Center][Mission Center] |
 | **File Manager**            | [Dolphin][Dolphin] |
-| **Fonts**                   | [Noto Sans][Noto Sans] + [Noto Mono Nerd Font][Noto Mono Nerd Font] |
+| **Fonts**                   | [Atkinson Hyperlegible Next][Atkinson Next] + [Nerd Fonts Atkinson Hyperlegible Mono][Atkinson Mono NF] |
 | **Color Scheme**            | [Breeze Dark][Breeze Dark] |
 | **Cursor**                  | [Bibata-Modern-Ice][Bibata-Modern-Ice] |
 | **Icons**                   | [WhiteSur][WhiteSur] |
@@ -252,8 +252,8 @@ This configuration is inspired by and based on the following sources:
 [Plasma NetworkManager]: https://userbase.kde.org/Plasma/NetworkManager
 [Mission Center]: https://gitlab.com/mission-center-devs/mission-center
 [Dolphin]: https://apps.kde.org/dolphin/
-[Noto Sans]: https://fonts.google.com/noto/specimen/Noto+Sans
-[Noto Mono Nerd Font]: https://www.nerdfonts.com/
+[Atkinson Next]: https://brailleinstitute.org/freefont
+[Atkinson Mono NF]: https://www.nerdfonts.com/font-downloads
 [Breeze Dark]: https://kde.org/announcements/plasma/5/5.0.0/
 [Bibata-Modern-Ice]: https://www.gnome-look.org/p/1197198
 [WhiteSur]: https://www.gnome-look.org/p/1403328

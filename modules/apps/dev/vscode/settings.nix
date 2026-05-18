@@ -14,7 +14,8 @@
             "window.titleBarStyle" = "custom"; # needed otherwise vscode crashes, see https://github.com/NixOS/nixpkgs/issues/246509
 
             "window.menuBarVisibility" = "toggle";
-            "terminal.integrated.fontFamily" = "NotoSansM Nerd Font Mono";
+            "editor.fontFamily" = "AtkynsonMono Nerd Font Mono";
+            "terminal.integrated.fontFamily" = "AtkynsonMono Nerd Font Mono";
             "editor.fontSize" = 18;
             "workbench.colorTheme" = "Reactor";
 

@@ -18,7 +18,7 @@
             background-opacity = 0.8;
             background-opacity-cells = true;
 
-            font-family = "NotoSansM Nerd Font Mono";
+            font-family = "AtkynsonMono Nerd Font Mono";
             font-size = 13;
 
             cursor-style = "bar";

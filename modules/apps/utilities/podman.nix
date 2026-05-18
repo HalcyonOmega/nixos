@@ -1,5 +1,6 @@
 { inputs, ... }:
 {
+  # Docker-compatible CLI + `/run/docker.sock` (Podman-backed) for Dev Containers and compose tooling.
   flake.nixosModules.podman =
     { pkgs, ... }:
     {

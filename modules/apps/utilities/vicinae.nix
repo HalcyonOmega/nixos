@@ -31,7 +31,7 @@
             font = {
               normal = {
                 size = 12;
-                family = "Maple Nerd Font";
+                family = "Atkinson Hyperlegible Next";
               };
             };
             # theme = {

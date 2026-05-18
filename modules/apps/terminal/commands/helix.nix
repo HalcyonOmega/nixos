@@ -12,10 +12,16 @@
           enable = true;
           settings = {
             # theme = "tokyonight_transparent";
-            editor.cursor-shape = {
-              normal = "block";
-              insert = "bar";
-              select = "underline";
+            editor = {
+              cursor-shape = {
+                normal = "block";
+                insert = "bar";
+                select = "underline";
+              };
+              fonts.primary = {
+                family = "AtkynsonMono Nerd Font Mono";
+                weight = "regular";
+              };
             };
           };
           languages.language = [

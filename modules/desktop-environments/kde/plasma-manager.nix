@@ -55,7 +55,6 @@
       home-manager.users.${username} = {
         home.packages = [
           pkgs.phinger-cursors
-          pkgs.atkinson-hyperlegible-next
         ];
 
         programs.plasma = {
@@ -97,6 +96,10 @@
           fonts = {
             general = {
               family = "Atkinson Hyperlegible Next";
+              pointSize = 12;
+            };
+            fixedWidth = {
+              family = "AtkynsonMono Nerd Font Mono";
               pointSize = 12;
             };
           };

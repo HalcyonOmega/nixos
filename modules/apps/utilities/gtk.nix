@@ -25,7 +25,7 @@
         #   };
 
         #   font = {
-        #     name = "Noto Sans";
+        #     name = "Atkinson Hyperlegible Next";
         #     size = 12;
         #   };
         # };
