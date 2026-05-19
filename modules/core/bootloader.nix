@@ -10,11 +10,12 @@
           # systemd-boot.enable = true;
           # systemd-boot.configurationLimit = 5;
         };
-        # initrd.systemd.enable = true;
-        # initrd.verbose = false;
+        initrd.systemd.enable = true;
+        initrd.verbose = false;
         supportedFilesystems = [
           "btrfs"
           "xfs"
+          "ext4"
         ];
         consoleLogLevel = 0;
         kernelParams = [

@@ -29,7 +29,7 @@
       environment.etc."calamares/modules/partition.conf".source = calamaresPartitionConf;
 
       environment.systemPackages = [
-        pkgs.disko
+        # pkgs.disko
         pkgs.gparted
         pkgs.git
         pkgs.nixos-install-tools

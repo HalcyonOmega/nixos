@@ -17,7 +17,7 @@
       self.nixosModules.core
       self.nixosModules.desktop-environments
       self.nixosModules.halcyon
-      inputs.stylix.nixosModules.stylix
+      # inputs.stylix.nixosModules.stylix
       inputs.home-manager.nixosModules.home-manager
       {
         home-manager.backupFileExtension = "backup";
@@ -99,19 +99,12 @@
       boot.extraModulePackages = [ ];
 
       fileSystems."/" = {
-        device = "/dev/disk/by-uuid/073cd577-a98f-4117-a284-0a908687ee55";
-        fsType = "xfs";
-        options = [ "subvol=@" ];
-      };
-
-      fileSystems."/home" = {
-        device = "/dev/disk/by-uuid/073cd577-a98f-4117-a284-0a908687ee55";
-        fsType = "xfs";
-        options = [ "subvol=@home" ];
+        device = "/dev/disk/by-uuid/dd63e3ea-6d71-4082-add6-9c083ca98968";
+        fsType = "ext4";
       };
 
       fileSystems."/boot" = {
-        device = "/dev/disk/by-uuid/1863-448C";
+        device = "/dev/disk/by-uuid/772A-6EC5";
         fsType = "vfat";
         options = [
           "fmask=0077"
