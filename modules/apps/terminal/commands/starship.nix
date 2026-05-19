@@ -40,8 +40,8 @@
           settings = {
             "$schema" = "https://starship.rs/config-schema.json";
 
-            palette = "reactor";
-            palettes.reactor = palette;
+            # palette = "reactor";
+            # palettes.reactor = palette;
 
             # Same modules / separators as `starship preset tokyo-night`; single line (no `\` escapes —
             # Starship treats `\` as an escape sequence and errors on `\` + newline from TOML/HM).
