@@ -13,6 +13,7 @@
         self.nixosModules.network
         self.nixosModules.hardware
         self.nixosModules.home-manager
+        self.nixosModules.localization
         self.nixosModules.pipewire
         self.nixosModules.program
         self.nixosModules.sched-ext

@@ -4,7 +4,7 @@
     {
       pkgs,
       username,
-      terminalTheme,
+      # terminalTheme,
       ...
     }:
     {
@@ -14,14 +14,15 @@
         programs.ghostty = {
           enable = true;
 
-          settings = terminalTheme.ghostty // {
-            background-opacity = 0.8;
-            background-opacity-cells = true;
+          # settings = terminalTheme.ghostty // {
+          settings = {
+            # background-opacity = 0.8;
+            # background-opacity-cells = true;
 
-            font-family = "AtkynsonMono Nerd Font Mono";
-            font-size = 13;
+            # font-family = "AtkynsonMono Nerd Font Mono";
+            # font-size = 13;
 
-            cursor-style = "bar";
+            # cursor-style = "bar";
 
             window-vsync = false;
             window-height = "30";
