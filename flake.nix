@@ -84,6 +84,8 @@
       imports = [
         (inputs.import-tree ./modules)
         inputs.home-manager.flakeModules.home-manager
+        ./hosts/desktop/halcyon.nix
+        ./hosts/iso/iso.nix
       ];
 
       _module.args = commonArgs // {
