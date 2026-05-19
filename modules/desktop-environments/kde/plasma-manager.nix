@@ -3,10 +3,45 @@
   flake.nixosModules.plasma-manager =
     {
       config,
+      lib,
       pkgs,
       username,
       ...
     }:
+    let
+      ultrawideWindows = pkgs.stdenv.mkDerivation (finalAttrs: {
+        pname = "kwin-script-ultrawide-windows";
+        version = "5.0";
+
+        src = pkgs.fetchFromGitHub {
+          owner = "lucmos";
+          repo = "UltrawideWindows";
+          rev = finalAttrs.version;
+          hash = "sha256-9Ku/3OisXtV7KExPEfgJOWwDakqw1OsLZrgS91LNBAA=";
+        };
+
+        nativeBuildInputs = [ pkgs.kdePackages.kpackage ];
+        buildInputs = [ pkgs.kdePackages.kwin ];
+
+        dontBuild = true;
+        dontWrapQtApps = true;
+
+        installPhase = ''
+          runHook preInstall
+
+          kpackagetool6 --type KWin/Script --install $src --packageroot $out/share/kwin/scripts
+
+          runHook postInstall
+        '';
+
+        meta = {
+          description = "KWin script to move windows quickly on ultrawide monitors";
+          homepage = "https://github.com/lucmos/UltrawideWindows";
+          license = lib.licenses.gpl2Only;
+          platforms = lib.platforms.linux;
+        };
+      });
+    in
     {
       programs.ydotool.enable = true;
 
@@ -55,6 +90,7 @@
       home-manager.users.${username} = {
         home.packages = [
           pkgs.phinger-cursors
+          ultrawideWindows
         ];
 
         programs.plasma = {
@@ -361,6 +397,42 @@
               # Show all windows on the current desktop using Meta+Tab
               "Toggle Overview" = "Meta+Tab";
 
+              MoveWindowToUpLeft3x2 = "Meta+Num+7";
+              MoveWindowToUpCenter3x2 = "Meta+Num+8";
+              MoveWindowToUpRight3x2 = "Meta+Num+9";
+              MoveWindowToLeftHeight3x2 = "Meta+Num+4";
+              MoveWindowToCenterHeight3x2 = "Meta+Num+5";
+              MoveWindowToRightHeight3x2 = "Meta+Num+6";
+              MoveWindowToDownLeft3x2 = "Meta+Num+1";
+              MoveWindowToDownCenter3x2 = "Meta+Num+2";
+              MoveWindowToDownRight3x2 = "Meta+Num+3";
+
+              MoveWindowToUpLeft2x2 = "Ctrl+Num+7";
+              MoveWindowToUpCenter2x2 = "Ctrl+Num+8";
+              MoveWindowToUpRight2x2 = "Ctrl+Num+9";
+              MoveWindowToLeftHeight2x2 = "Ctrl+Num+4";
+              MoveWindowToRightHeight2x2 = "Ctrl+Num+6";
+              MoveWindowToDownLeft2x2 = "Ctrl+Num+1";
+              MoveWindowToDownCenter2x2 = "Ctrl+Num+2";
+              MoveWindowToDownRight2x2 = "Ctrl+Num+3";
+
+              MoveWindowToUpLeft23 = "Alt+Num+7";
+              MoveWindowToUpCenter23 = "Alt+Num+8";
+              MoveWindowToUpRight23 = "Alt+Num+9";
+              MoveWindowToLeftHeight23 = "Alt+Num+4";
+              MoveWindowToRightHeight23 = "Alt+Num+6";
+              MoveWindowToFitDownLeft23 = "Alt+Num+1";
+              MoveWindowToDownCenter23 = "Alt+Num+2";
+              MoveWindowToFitDownRight23 = "Alt+Num+3";
+
+              MoveWindowToMaximize = "Meta+Num+0";
+              MoveWindowToCenter = "Ctrl+Num+5";
+              IncreaseWindowSize = "Ctrl+Meta+Num++";
+              DecreaseWindowSize = "Ctrl+Meta+Num+-";
+              MoveWindowLeft = "Ctrl+Meta+Left";
+              MoveWindowRight = "Ctrl+Meta+Right";
+              MoveWindowUp = "Ctrl+Meta+Up";
+              MoveWindowDown = "Ctrl+Meta+Down";
             };
           };
 
@@ -372,6 +444,7 @@
             kcminputrc.Keyboard.NumLock = 0;
             kwinrc."org.kde.kdecoration2".ButtonsOnLeft = "SF";
             kwinrc.ModifierOnlyShortcuts.Meta = "org.kde.kglobalaccel,/component/kwin,org.kde.kglobalaccel.Component,invokeShortcut,Overview";
+            kwinrc.Plugins.ultrawidewindowsEnabled = true;
             kwinrc.Desktops.Number = {
               value = 1;
             };

@@ -287,7 +287,7 @@
         btop = mkBtopTheme colors;
       };
 
-      reactorScheme = parseBase16Yaml ../../assets/themes/base16/reactor.yaml;
+      reactorScheme = parseBase16Yaml ../../assets/themes/reactor.yaml;
       terminalTheme = mkTheme (mkColorsFromBase16 reactorScheme);
     in
     {
@@ -299,31 +299,6 @@
         polarity = "dark";
 
         base16Scheme = ./../../assets/themes/reactor.yaml;
-        #   # base16Scheme = {
-        #   #   system = "base16";
-        #   #   name = "selenized-black";
-        #   #   author = "Jan Warchol (https://github.com/jan-warchol/selenized) / adapted to base16 by ali";
-        # variant = "dark";
-
-        # palette = {
-        #   base00 = "0b0f14";
-        #   base01 = "141a21";
-        #   base02 = "222b35";
-        #   base03 = "53616f";
-        #   base04 = "8d9aa7";
-        #   base05 = "c8d0d8";
-        #   base06 = "e4e9ee";
-        #   base07 = "f7f9fb";
-        #   base08 = "ff4f58";
-        #   base09 = "ff9f43";
-        #   base0A = "f6c85f";
-        #   base0B = "7bd88f";
-        #   base0C = "3dd6d0";
-        #   base0D = "46b4ff";
-        #   base0E = "9d7cff";
-        #   base0F = "d0765f";
-        # };
-        #   # };
 
         #   opacity = {
         #     terminal = opacity;
