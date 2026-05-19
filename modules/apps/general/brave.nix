@@ -8,7 +8,7 @@
     }:
     {
       home-manager.users.${username} = {
-        # home.packages = [ pkgs.brave ];
+        # home.packages = [ pkgs.vivaldi ];
         # home.packages = [ inputs.brave-origin.packages.${pkgs.system}.default ];
 
         programs.brave = {
