@@ -9,3 +9,15 @@
 - Setup p4v
 - Get Unreal Engine running
 - Fix lock screen wallpaper - commented out because file path was not in a centralized location
+
+## Inspirations
+
+- https://github.com/fufexan/dotfiles/tree/main
+- https://github.com/redxtech/nixfiles/tree/main
+- https://github.com/Zolkyed/nixos-kde-config/
+- https://github.com/srid/nixos-unified
+- https://github.com/Misterio77/nix-starter-configs
+- https://github.com/NotAShelf/nyx
+- https://github.com/EmergentMind/nix-config
+- https://github.com/hlissner/dotfiles
+- https://github.com/Mic92/dotfiles
