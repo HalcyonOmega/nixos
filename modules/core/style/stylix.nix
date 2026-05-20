@@ -9,7 +9,7 @@
 
       stylix = {
         enable = true;
-        image = ../../../assets/wallpapers/mountain3.jpg;
+        image = ../../../assets/wallpapers/vortex.jpg;
         polarity = "dark";
 
         base16Scheme = ../../../assets/themes/reactor.yaml;

@@ -8,3 +8,4 @@
 - Look at redxtech/nix setup for Sunshine game streaming server
 - Setup p4v
 - Get Unreal Engine running
+- Fix lock screen wallpaper - commented out because file path was not in a centralized location
