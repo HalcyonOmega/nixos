@@ -9,6 +9,8 @@
         self.nixosModules.general
         self.nixosModules.terminal
         self.nixosModules.utilities
+
+        # self.nixosModules.appimage
         self.nixosModules.flatpak
       ];
     };

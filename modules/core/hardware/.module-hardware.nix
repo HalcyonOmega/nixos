@@ -1,45 +1,23 @@
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
   flake.nixosModules.hardware =
     {
-      config,
       pkgs,
       ...
     }:
     {
-      hardware = {
-        logitech.wireless.enable = true;
-        logitech.wireless.enableGraphical = true;
-        graphics = {
-          enable = true;
-          enable32Bit = true;
-        };
-      };
+      imports = [
+        self.nixosModules.bluetooth
+        self.nixosModules.graphics
+        self.nixosModules.keyboard
+        self.nixosModules.mouse
+      ];
 
       environment.systemPackages = [
         pkgs.libva-utils
         pkgs.vdpauinfo
         pkgs.vulkan-tools
       ];
-
-      services.keyd = {
-        enable = true;
-
-        keyboards.default = {
-          ids = [ "*" ];
-          settings = {
-            main = {
-              # Treat held Caps Lock as Hyper: Ctrl+Alt+Meta+Shift.
-              capslock = "overload(hyper, C-A-M-S-space)";
-            };
-
-            "hyper:C-A-M-S" = {
-              # Close the focused window without relying on KWin's shortcut handling.
-              q = "A-f4";
-            };
-          };
-        };
-      };
 
       services.udev.extraRules = builtins.concatStringsSep "\n" [
         # rule for via firmware flashing

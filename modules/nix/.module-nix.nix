@@ -4,7 +4,8 @@
     { ... }:
     {
       imports = [
-        self.nixosModules.nh
+        self.nixosModules.home-manager
+        self.nixosModules.nixhelper
         self.nixosModules.nixpkgs
         self.nixosModules.settings
         self.nixosModules.substituters

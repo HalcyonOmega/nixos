@@ -4,21 +4,16 @@
     { ... }:
     {
       imports = [
-        self.nixosModules.appimage
-        self.nixosModules.bluetooth
-        self.nixosModules.bootloader
-        self.nixosModules.fonts
-        self.nixosModules.gtk
-        self.nixosModules.mouse
-        self.nixosModules.network
         self.nixosModules.hardware
-        self.nixosModules.home-manager
+        self.nixosModules.style
+
+        self.nixosModules.audio
+        self.nixosModules.boot
+        self.nixosModules.network
         self.nixosModules.localization
-        self.nixosModules.pipewire
         self.nixosModules.program
         self.nixosModules.sched-ext
         self.nixosModules.security
-        self.nixosModules.style
         self.nixosModules.system
         self.nixosModules.user
         self.nixosModules.virtualization

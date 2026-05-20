@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
   flake.nixosModules.style =
     {
@@ -291,6 +291,11 @@
       terminalTheme = mkTheme (mkColorsFromBase16 reactorScheme);
     in
     {
+      imports = [
+        self.nixosModule.fonts
+        self.nixosModules.gtk
+      ];
+
       _module.args.terminalTheme = terminalTheme;
 
       stylix = {

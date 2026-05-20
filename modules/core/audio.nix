@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules.pipewire =
+  flake.nixosModules.audio =
     { pkgs, ... }:
     {
       services = {

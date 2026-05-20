@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules.bootloader =
+  flake.nixosModules.boot =
     { pkgs, lib, ... }:
     # let
     #   cfg = config.nexos.performance;
@@ -35,8 +35,10 @@
           # systemd-boot.enable = true;
           # systemd-boot.configurationLimit = 5;
         };
-        initrd.systemd.enable = true;
-        initrd.verbose = false;
+        initrd = {
+          systemd.enable = true;
+          verbose = false;
+        };
         supportedFilesystems = [
           "btrfs"
           "xfs"

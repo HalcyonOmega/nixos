@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules.nh =
+  flake.nixosModules.nixhelper =
     { pkgs, username, ... }:
     {
       programs.nh = {
