@@ -13,7 +13,7 @@
   flake.nixosConfigurations.halcyon = inputs.nixpkgs.lib.nixosSystem {
     inherit system;
     modules = [
-      ./hardware-configuration.nix
+      ./_hardware-configuration.nix
       self.nixosModules.apps
       self.nixosModules.core
       self.nixosModules.desktop-environments
