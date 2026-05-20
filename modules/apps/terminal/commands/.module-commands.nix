@@ -15,7 +15,6 @@
         self.nixosModules.fzf
         self.nixosModules.git
         self.nixosModules.helix
-        self.nixosModules.nh
         self.nixosModules.nitch
         self.nixosModules.openssl
         self.nixosModules.ripgrep
