@@ -9,7 +9,6 @@
     {
       home-manager.users.${username} = {
         # home.packages = [ pkgs.vivaldi ];
-        # home.packages = [ inputs.brave-origin.packages.${pkgs.system}.default ];
 
         programs.brave = {
           enable = true;

@@ -5,7 +5,7 @@
     with lib;
     let
       defaultApps = {
-        browser = [ "vivaldi.desktop" ];
+        browser = [ "brave.desktop" ];
         text = [ "kate.desktop" ];
         image = [ "imv-dir.desktop" ];
         audio = [ "mpv.desktop" ];

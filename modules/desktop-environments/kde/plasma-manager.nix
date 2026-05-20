@@ -41,6 +41,7 @@
           platforms = lib.platforms.linux;
         };
       });
+      desktopWallpaper = ./../../../assets/wallpapers/vortex.jpg;
     in
     {
       programs.ydotool.enable = true;
@@ -108,7 +109,7 @@
             theme = "breeze-dark";
             colorScheme = "BreezeDark";
             iconTheme = "breeze-dark";
-            wallpaper = ./../../../assets/wallpapers/vortex.jpg;
+            wallpaper = desktopWallpaper;
           };
 
           hotkeys.commands."launch-terminal" = {
@@ -449,10 +450,11 @@
               value = 1;
             };
             kscreenlockerrc = {
-              Greeter.WallpaperPlugin = "org.kde.potd";
-              # To use nested groups use / as a separator. In the below example,
-              # Provider will be added to [Greeter][Wallpaper][org.kde.potd][General].
-              "Greeter/Wallpaper/org.kde.potd/General".Provider = "bing";
+              Greeter.WallpaperPlugin = "org.kde.image";
+              "Greeter/Wallpaper/org.kde.image/General" = {
+                Image = "file://${desktopWallpaper}";
+                PreviewImage = "file://${desktopWallpaper}";
+              };
             };
           };
         };

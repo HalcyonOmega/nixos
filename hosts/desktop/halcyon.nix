@@ -17,7 +17,9 @@
       self.nixosModules.apps
       self.nixosModules.core
       self.nixosModules.desktop-environments
+      self.nixosModules.nix
       self.nixosModules.halcyon
+
       inputs.stylix.nixosModules.stylix
       inputs.home-manager.nixosModules.home-manager
       {
