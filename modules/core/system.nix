@@ -31,17 +31,17 @@
       # };
 
       # config = {
-      # nix = {
-      #   settings = {
-      #     auto-optimise-store = true;
-      #     experimental-features = [
-      #       "nix-command"
-      #       "flakes"
-      #     ];
+      #   nix = {
+      #     settings = {
+      #       auto-optimise-store = true;
+      #       experimental-features = [
+      #         "nix-command"
+      #         "flakes"
+      #       ];
+      #     };
       #   };
-      # };
 
-      # boot.kernelPackages = kernelPackages.${cfg.kernel};
+      #   # boot.kernelPackages = kernelPackages.${cfg.kernel};
       # };
       system.stateVersion = "26.11";
     };
