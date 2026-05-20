@@ -67,7 +67,7 @@
 
             git_branch = {
               symbol = "";
-              style = "bold fg:black bg:purple";
+              style = "bold fg:black bg:orange";
               format = "[ $symbol $branch ]($style)";
             };
 
@@ -112,7 +112,7 @@
 
             php = {
               symbol = "";
-              style = "bold fg:black bg:purple";
+              style = "bold fg:black bg:red";
               format = "[ $symbol $version ]($style)";
             };
 
@@ -158,8 +158,8 @@
               success_symbol = "[❯](bold fg:green)";
               error_symbol = "[❯](bold fg:red)";
               vimcmd_symbol = "[❮](bold fg:green)";
-              vimcmd_replace_one_symbol = "[❮](bold fg:purple)";
-              vimcmd_replace_symbol = "[❮](bold fg:purple)";
+              vimcmd_replace_one_symbol = "[❮](bold fg:orange)";
+              vimcmd_replace_symbol = "[❮](bold fg:orange)";
               vimcmd_visual_symbol = "[❮](bold fg:yellow)";
             };
           };

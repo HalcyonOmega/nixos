@@ -339,8 +339,8 @@
                   apply = "force";
                 };
                 # `apply` defaults to "apply-initially"
-                maximizehoriz = true;
-                maximizevert = true;
+                #maximizehoriz = true;
+                #maximizevert = true;
               };
             }
           ];
@@ -366,12 +366,13 @@
             };
           };
 
-          # kwin = {
-          #   edgeBarrier = 0; # Disables the edge-barriers introduced in plasma 6.1
-          #   cornerBarrier = false;
-
-          #   scripts.polonium.enable = true
-          # };
+          kwin = {
+            effects = {
+              minimization.animation = "off";
+              desktopSwitching.animation = "off";
+              windowOpenClose.animation = "off";
+            };
+          };
 
           kscreenlocker = {
             lockOnResume = true;
@@ -443,6 +444,9 @@
           configFile = {
             baloofilerc."Basic Settings"."Indexing-Enabled" = false;
             kcminputrc.Keyboard.NumLock = 0;
+            kdeglobals.KDE.AnimationDurationFactor = 0;
+            kwinrc.Compositing.AnimationSpeed = 0;
+            kwinrc.Plugins.slidingpopupsEnabled = false;
             kwinrc."org.kde.kdecoration2".ButtonsOnLeft = "SF";
             kwinrc.ModifierOnlyShortcuts.Meta = "org.kde.kglobalaccel,/component/kwin,org.kde.kglobalaccel.Component,invokeShortcut,Overview";
             kwinrc.Plugins.ultrawidewindowsEnabled = true;
