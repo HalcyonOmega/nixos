@@ -4,7 +4,6 @@
     {
       pkgs,
       username,
-      # terminalTheme,
       ...
     }:
     {
@@ -12,14 +11,6 @@
         programs.btop = {
           enable = true;
           package = pkgs.btop;
-
-          # settings = {
-          #   color_theme = "reactor";
-          #   theme_background = false;
-          #   truecolor = true;
-          # };
-
-          # themes.reactor = terminalTheme.btop;
         };
       };
     };

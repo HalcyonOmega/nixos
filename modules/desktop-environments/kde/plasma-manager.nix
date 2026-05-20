@@ -41,7 +41,7 @@
           platforms = lib.platforms.linux;
         };
       });
-      desktopWallpaper = ./../../../assets/wallpapers/vortex.jpg;
+      # desktopWallpaper = ./../../../assets/wallpapers/vortex.jpg;
     in
     {
       programs.ydotool.enable = true;
@@ -109,7 +109,7 @@
             theme = "breeze-dark";
             colorScheme = "BreezeDark";
             iconTheme = "breeze-dark";
-            wallpaper = desktopWallpaper;
+            # wallpaper = desktopWallpaper;
           };
 
           hotkeys.commands."launch-terminal" = {
@@ -452,8 +452,8 @@
             kscreenlockerrc = {
               Greeter.WallpaperPlugin = "org.kde.image";
               "Greeter/Wallpaper/org.kde.image/General" = {
-                Image = "file://${desktopWallpaper}";
-                PreviewImage = "file://${desktopWallpaper}";
+                # Image = "file://${desktopWallpaper}";
+                # PreviewImage = "file://${desktopWallpaper}";
               };
             };
           };

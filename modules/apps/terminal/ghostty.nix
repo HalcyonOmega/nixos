@@ -4,7 +4,6 @@
     {
       pkgs,
       username,
-      # terminalTheme,
       ...
     }:
     {
@@ -14,13 +13,9 @@
         programs.ghostty = {
           enable = true;
 
-          # settings = terminalTheme.ghostty // {
           settings = {
             # background-opacity = 0.8;
             # background-opacity-cells = true;
-
-            # font-family = "AtkynsonMono Nerd Font Mono";
-            # font-size = 13;
 
             # cursor-style = "bar";
 
@@ -31,9 +26,6 @@
             quit-after-last-window-closed = false;
 
             desktop-notifications = true;
-
-            # custom-shader-animation = "always";
-            # custom-shader = [ "${ghosttyShaders}/cursor_sweep.glsl" ];
           };
 
           enableFishIntegration = true;

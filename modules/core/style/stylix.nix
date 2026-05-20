@@ -3,9 +3,13 @@
   flake.nixosModules.stylix =
     { ... }:
     {
+      imports = [
+        inputs.stylix.nixosModules.stylix
+      ];
+
       stylix = {
         enable = true;
-        image = ../../../assets/wallpapers/vortex.jpg;
+        image = ../../../assets/wallpapers/mountain3.jpg;
         polarity = "dark";
 
         base16Scheme = ../../../assets/themes/reactor.yaml;
