@@ -4,7 +4,7 @@
     {
       pkgs,
       username,
-      terminalTheme,
+      # terminalTheme,
       ...
     }:
     {
