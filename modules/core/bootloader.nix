@@ -2,8 +2,33 @@
 {
   flake.nixosModules.bootloader =
     { pkgs, lib, ... }:
+    # let
+    #   cfg = config.nexos.performance;
+
+    #   kernelPackages = {
+    #     safe = pkgs.linuxPackages_zen;
+    #     lts = pkgs.cachyosKernels.linuxPackages-cachyos-lts;
+    #     performance = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
+    #   };
+    # in
     {
       boot = {
+        # options.nexos.performance = {
+        #   kernel = lib.mkOption {
+        #     type = lib.types.enum (builtins.attrNames kernelPackages);
+        #     default = "safe";
+        #     description = ''
+        #       Kernel profile to boot: safe uses Zen, lts uses CachyOS LTS, and performance uses CachyOS latest.
+        #     '';
+        #   };
+
+        #   cachyosKernelCache = lib.mkEnableOption "the nix-cachyos-kernel binary cache";
+        # };
+        # config = {
+        #   boot.kernelPackages = kernelPackages.${cfg.kernel};
+        # };
+        kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
+
         loader = {
           efi.canTouchEfiVariables = true;
           limine.enable = true;

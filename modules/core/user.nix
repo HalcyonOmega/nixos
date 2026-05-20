@@ -14,7 +14,5 @@
         ];
         initialPassword = "password";
       };
-
-      nix.settings.allowed-users = [ "${username}" ];
     };
 }

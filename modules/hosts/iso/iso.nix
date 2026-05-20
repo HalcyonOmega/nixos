@@ -10,7 +10,6 @@
   flake.nixosModules.isoModule =
     { pkgs, modulesPath, ... }:
     {
-
       imports = [
         "${modulesPath}/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix"
         "${modulesPath}/installer/cd-dvd/channel.nix"
@@ -23,11 +22,8 @@
         pkgs.gparted
         pkgs.git
         pkgs.nixos-install-tools
-        pkgs.micro
-        pkgs.xfsprogs
+        pkgs.helix
       ];
-
-      programs.hyprland.enable = true;
 
       nix.settings.experimental-features = [
         "nix-command"

@@ -62,9 +62,9 @@
       ...
     }:
     {
-      nexos.performance = {
-        kernel = "performance";
-        cachyosKernelCache = true;
-      };
+      # nexos.performance = {
+      #   kernel = "performance";
+      #   cachyosKernelCache = true;
+      # };
     };
 }
