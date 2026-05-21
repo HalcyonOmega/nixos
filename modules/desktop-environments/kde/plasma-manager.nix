@@ -390,23 +390,30 @@
             };
 
             kwin = {
-              "Expose" = "Meta+,";
+              "Expose" = "Meta+Space";
               "Switch Window Down" = "Meta+J";
               "Switch Window Left" = "Meta+H";
               "Switch Window Right" = "Meta+L";
               "Switch Window Up" = "Meta+K";
-              # Show all windows on the current desktop using Meta+Tab
-              "Toggle Overview" = "Meta+Tab";
 
-              MoveWindowToUpLeft3x2 = "Meta+Num+7";
-              MoveWindowToUpCenter3x2 = "Meta+Num+8";
-              MoveWindowToUpRight3x2 = "Meta+Num+9";
-              MoveWindowToLeftHeight3x2 = "Meta+Num+4";
-              MoveWindowToCenterHeight3x2 = "Meta+Num+5";
-              MoveWindowToRightHeight3x2 = "Meta+Num+6";
-              MoveWindowToDownLeft3x2 = "Meta+Num+1";
-              MoveWindowToDownCenter3x2 = "Meta+Num+2";
-              MoveWindowToDownRight3x2 = "Meta+Num+3";
+              MoveWindowToUpLeft3x2 = "Ctrl+Meta+Num+7";
+              MoveWindowToUpCenter3x2 = "Ctrl+Meta+Num+8";
+              MoveWindowToUpRight3x2 = "Ctrl+Meta+Num+9";
+              MoveWindowToLeftHeight3x2 = "Ctrl+Meta+Num+4";
+              MoveWindowToCenterHeight3x2 = "Ctrl+Meta+Num+5";
+              MoveWindowToRightHeight3x2 = "Ctrl+Meta+Num+6";
+              MoveWindowToDownLeft3x2 = "Ctrl+Meta+Num+1";
+              MoveWindowToDownCenter3x2 = "Ctrl+Meta+Num+2";
+              MoveWindowToDownRight3x2 = "Ctrl+Meta+Num+3";
+
+              "Window Quick Tile Bottom" = "none";
+              "Window Quick Tile Bottom Left" = "none";
+              "Window Quick Tile Bottom Right" = "none";
+              "Window Quick Tile Left" = "none";
+              "Window Quick Tile Right" = "none";
+              "Window Quick Tile Top" = "none";
+              "Window Quick Tile Top Left" = "none";
+              "Window Quick Tile Top Right" = "none";
 
               MoveWindowToUpLeft2x2 = "Ctrl+Num+7";
               MoveWindowToUpCenter2x2 = "Ctrl+Num+8";
@@ -417,6 +424,16 @@
               MoveWindowToDownCenter2x2 = "Ctrl+Num+2";
               MoveWindowToDownRight2x2 = "Ctrl+Num+3";
 
+              MoveWindowToUpLeft4x2_centerbiased = "Meta+Num+7";
+              MoveWindowToUpCenter4x2_centerbiased = "Meta+Num+8";
+              MoveWindowToUpRight4x2_centerbiased = "Meta+Num+9";
+              MoveWindowToLeftHeight4x2_centerbiased = "Meta+Num+4";
+              MoveWindowToCenterHeight4x2_centerbiased = "Meta+Num+5";
+              MoveWindowToRightHeight4x2_centerbiased = "Meta+Num+6";
+              MoveWindowToDownLeft4x2_centerbiased = "Meta+Num+1";
+              MoveWindowToDownCenter4x2_centerbiased = "Meta+Num+2";
+              MoveWindowToDownRight4x2_centerbiased = "Meta+Num+3";
+
               MoveWindowToUpLeft23 = "Alt+Num+7";
               MoveWindowToUpCenter23 = "Alt+Num+8";
               MoveWindowToUpRight23 = "Alt+Num+9";
@@ -425,6 +442,16 @@
               MoveWindowToFitDownLeft23 = "Alt+Num+1";
               MoveWindowToDownCenter23 = "Alt+Num+2";
               MoveWindowToFitDownRight23 = "Alt+Num+3";
+
+              MoveWindowToUpLeft23_center_biased = "Alt+Meta+Num+7";
+              MoveWindowToUpCenter23_center_biased = "Alt+Meta+Num+8";
+              MoveWindowToUpRight23_center_biased = "Alt+Meta+Num+9";
+              MoveWindowToLeftHeight23_center_biased = "Alt+Meta+Num+4";
+              MoveWindowToCenterHeight23_center_biased = "Alt+Meta+Num+5";
+              MoveWindowToRightHeight23_center_biased = "Alt+Meta+Num+6";
+              MoveWindowToFitDownLeft23_center_biased = "Alt+Meta+Num+1";
+              MoveWindowToDownCenter23_center_biased = "Alt+Meta+Num+2";
+              MoveWindowToFitDownRight23_center_biased = "Alt+Meta+Num+3";
 
               MoveWindowToMaximize = "Meta+Num+0";
               MoveWindowToCenter = "Ctrl+Num+5";
@@ -447,7 +474,7 @@
             kwinrc.Compositing.AnimationSpeed = 0;
             kwinrc.Plugins.slidingpopupsEnabled = false;
             kwinrc."org.kde.kdecoration2".ButtonsOnLeft = "SF";
-            kwinrc.ModifierOnlyShortcuts.Meta = "org.kde.kglobalaccel,/component/kwin,org.kde.kglobalaccel.Component,invokeShortcut,Overview";
+            kwinrc.ModifierOnlyShortcuts.Meta = "";
             kwinrc.Plugins.ultrawidewindowsEnabled = true;
             kwinrc.Desktops.Number = {
               value = 1;
