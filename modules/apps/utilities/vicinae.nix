@@ -34,25 +34,29 @@
                 family = "Atkinson Hyperlegible Next";
               };
             };
-            # theme = {
-            #   light = {
-            #     name = "vicinae-light";
-            #     icon_theme = "default";
-            #   };
-            #   dark = {
-            #     name = "vicinae-dark";
-            #     icon_theme = "default";
-            #   };
-            # };
             launcher_window = {
               # opacity = 0.98;
+            };
+            providers = {
+              applications = {
+                entrypoints = {
+                  cursor-code.alias = "cur";
+                  codium.alias = "cod";
+                  brave-browser.alias = "br";
+                  bitwarden.alias = "bit";
+                  systemsettings.alias = "set";
+                };
+              };
             };
           };
           extensions = with inputs.vicinae-extensions.packages.${pkgs.stdenv.hostPlatform.system}; [
             bluetooth
             nix
             power-profile
-            # Extension names can be found in the link below, it's just the folder names
+            # flathub - find name
+            # systemd - find name
+            chromium-bookmarks
+            # Extension names are just the folder names
           ];
         };
       };
