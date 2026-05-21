@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ ... }:
 {
   flake.nixosModules.vscode-settings =
     { username, ... }:
@@ -14,8 +14,8 @@
             "window.titleBarStyle" = "custom"; # needed otherwise vscode crashes, see https://github.com/NixOS/nixpkgs/issues/246509
 
             "window.menuBarVisibility" = "toggle";
-            "editor.fontFamily" = "AtkynsonMono Nerd Font Mono";
-            "terminal.integrated.fontFamily" = "AtkynsonMono Nerd Font Mono";
+            "editor.fontFamily" = "JetBrainsMono Nerd Font Mono";
+            "terminal.integrated.fontFamily" = "JetBrainsMono Nerd Font Mono";
             "editor.fontSize" = 18;
             "workbench.colorTheme" = "Reactor";
 

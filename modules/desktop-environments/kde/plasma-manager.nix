@@ -1,8 +1,7 @@
-{ inputs, ... }:
+{ ... }:
 {
   flake.nixosModules.plasma-manager =
     {
-      config,
       lib,
       pkgs,
       username,
@@ -136,7 +135,7 @@
               pointSize = 12;
             };
             fixedWidth = {
-              family = "AtkynsonMono Nerd Font Mono";
+              family = "JetBrainsMono Nerd Font Mono";
               pointSize = 12;
             };
           };

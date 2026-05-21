@@ -10,10 +10,7 @@
     inherit system;
     modules = [
       ./_hardware-configuration.nix
-      self.nixosModules.apps
-      self.nixosModules.core
-      self.nixosModules.desktop-environments
-      self.nixosModules.nix
+      self.nixosModules.halcyon
     ];
 
     specialArgs = commonArgs // {
@@ -30,9 +27,22 @@
       ...
     }:
     {
-      # nexos.performance = {
-      #   kernel = "performance";
-      #   cachyosKernelCache = true;
-      # };
+      imports = [
+        self.nixosModules.apps
+        self.nixosModules.core
+        self.nixosModules.desktop-environments
+        self.nixosModules.nix
+      ];
+
+      nexos = {
+        # hardware.bluetooth = {
+        #   enable = true;
+        #   powerOnBoot = true;
+        # };
+
+        performance = {
+          kernel = "performance";
+        };
+      };
     };
 }
