@@ -8,7 +8,7 @@
       ...
     }:
     let
-      cfg = config.nexos.performance;
+      cfg = config.nixos.performance;
     in
     {
       nix.settings = {

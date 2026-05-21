@@ -15,7 +15,7 @@
       };
     in
     {
-      options.nexos.performance = {
+      options.nixos.performance = {
         kernel = lib.mkOption {
           type = lib.types.enum (builtins.attrNames kernelPackages);
           default = "safe";
@@ -27,7 +27,7 @@
 
       config = {
         boot = {
-          kernelPackages = kernelPackages.${config.nexos.performance.kernel};
+          kernelPackages = kernelPackages.${config.nixos.performance.kernel};
           loader = {
             efi.canTouchEfiVariables = true;
             limine = {

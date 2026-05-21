@@ -28,7 +28,7 @@
         self.nixosModules.nix
       ];
 
-      nexos = {
+      nixos = {
         # hardware.bluetooth = {
         #   enable = true;
         #   powerOnBoot = true;

@@ -16,7 +16,7 @@
         upgrade = "nix flake update";
         build = "nh os build";
         clean = "nh clean all";
-        build_iso = "nix run nixpkgs#nixos-generators -- --format iso --flake ~/nexos#iso -o result";
+        build_iso = "nix run nixpkgs#nixos-generators -- --format iso --flake ~/nixos#iso -o result";
       };
     };
 }

@@ -9,7 +9,7 @@
           enable = true;
           extraArgs = "--keep-since 7d --keep 5";
         };
-        flake = "/home/${username}/nexos";
+        flake = "/home/${username}/nixos";
       };
 
       environment.systemPackages = [
