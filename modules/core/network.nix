@@ -17,11 +17,10 @@
             22
             80
             443
-            53317
+            53317 # Localsend
           ];
           allowedUDPPorts = [
-            # 19132
-            53317
+            53317 # Localsend
           ];
         };
       };

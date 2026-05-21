@@ -19,13 +19,7 @@
   };
 
   flake.nixosModules.halcyon =
-    {
-      config,
-      lib,
-      pkgs,
-      modulesPath,
-      ...
-    }:
+    { ... }:
     {
       imports = [
         self.nixosModules.apps

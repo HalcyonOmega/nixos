@@ -26,9 +26,6 @@
       };
 
       config = {
-        # boot.kernelPackages = kernelPackages.${config.nexos.performance.kernel};
-        # };
-
         boot = {
           kernelPackages = kernelPackages.${config.nexos.performance.kernel};
           loader = {

@@ -1,7 +1,7 @@
 <h1 align="center">
     <img src="./assets/github/nixos-logo.webp" width="120px" /> 
     <br>
-      Nate's NixOS KDE 
+      ***OLD*** Nate's NixOS KDE 
       <p></p>
     <div align="center">
     </div>
@@ -54,20 +54,9 @@
 
 
 
-## 📝 Shell aliases
+## 📝 Shell Aliases
 
-<details>
-<summary>
-Utils (EXPAND)
-</summary>
-
-- ```l```     $\rightarrow$ ```ls -lh --color=auto```
-- ```c```     $\rightarrow$ ```clear```
-- ```disk```  $\rightarrow$ ```lsblk -f```
-- ```ff```    $\rightarrow$ ```fastfetch```
-- ```nit```   $\rightarrow$ ```nitch```
-
-</details>
+[Aliases](modules/apps/terminal/aliases.nix)
 
 <details>
 <summary>
@@ -127,8 +116,6 @@ Run ```nixos-generate-config``` to generate hardware configuration files:
 Custom Keybindings 
 </summary>
 </br>
-##### Terminal
-- ```Meta+Alt+K``` Launch Konsole
 
 ##### Window Management (Tiling-style)
 - ```Meta+H``` Switch Window Left
