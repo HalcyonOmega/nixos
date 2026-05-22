@@ -117,10 +117,28 @@
             command = "ghostty";
           };
 
+          hotkeys.commands."launch-terminal-hyper-tab" = {
+            name = "Launch Terminal";
+            key = "Meta+Ctrl+Alt+Shift+Tab";
+            command = "ghostty";
+          };
+
+          hotkeys.commands."launch-web-browser" = {
+            name = "Launch Web Browser";
+            key = "Meta+Ctrl+Alt+Shift+B";
+            command = "brave-origin-beta";
+          };
+
           hotkeys.commands."launch-file-browser" = {
             name = "Launch File Browser";
             key = "Meta+Ctrl+Alt+Shift+E";
             command = "dolphin";
+          };
+
+          hotkeys.commands."launch-system-settings" = {
+            name = "Launch System Settings";
+            key = "Meta+Ctrl+Alt+Shift+S";
+            command = "systemsettings";
           };
 
           hotkeys.commands."toggle-vicinae" = {
@@ -396,16 +414,6 @@
               "Switch Window Right" = "Meta+L";
               "Switch Window Up" = "Meta+K";
 
-              MoveWindowToUpLeft3x2 = "Ctrl+Meta+Num+7";
-              MoveWindowToUpCenter3x2 = "Ctrl+Meta+Num+8";
-              MoveWindowToUpRight3x2 = "Ctrl+Meta+Num+9";
-              MoveWindowToLeftHeight3x2 = "Ctrl+Meta+Num+4";
-              MoveWindowToCenterHeight3x2 = "Ctrl+Meta+Num+5";
-              MoveWindowToRightHeight3x2 = "Ctrl+Meta+Num+6";
-              MoveWindowToDownLeft3x2 = "Ctrl+Meta+Num+1";
-              MoveWindowToDownCenter3x2 = "Ctrl+Meta+Num+2";
-              MoveWindowToDownRight3x2 = "Ctrl+Meta+Num+3";
-
               "Window Quick Tile Bottom" = "none";
               "Window Quick Tile Bottom Left" = "none";
               "Window Quick Tile Bottom Right" = "none";
@@ -415,25 +423,57 @@
               "Window Quick Tile Top Left" = "none";
               "Window Quick Tile Top Right" = "none";
 
-              MoveWindowToUpLeft2x2 = "Ctrl+Num+7";
-              MoveWindowToUpCenter2x2 = "Ctrl+Num+8";
-              MoveWindowToUpRight2x2 = "Ctrl+Num+9";
-              MoveWindowToLeftHeight2x2 = "Ctrl+Num+4";
-              MoveWindowToRightHeight2x2 = "Ctrl+Num+6";
-              MoveWindowToDownLeft2x2 = "Ctrl+Num+1";
-              MoveWindowToDownCenter2x2 = "Ctrl+Num+2";
-              MoveWindowToDownRight2x2 = "Ctrl+Num+3";
+              # CTRL As Indicator For Cohesive Layer
+              # Ultrawide - Default Layer [ 25 | 50 | 25 ]%
+              MoveWindowToUpLeft4x2_centerbiased = "Ctrl+Num+7";
+              MoveWindowToUpCenter4x2_centerbiased = "Ctrl+Num+8";
+              MoveWindowToUpRight4x2_centerbiased = "Ctrl+Num+9";
+              MoveWindowToLeftHeight4x2_centerbiased = "Ctrl+Num+4";
+              MoveWindowToCenterHeight4x2_centerbiased = "Ctrl+Num+5";
+              MoveWindowToRightHeight4x2_centerbiased = "Ctrl+Num+6";
+              MoveWindowToDownLeft4x2_centerbiased = "Ctrl+Num+1";
+              MoveWindowToDownCenter4x2_centerbiased = "Ctrl+Num+2";
+              MoveWindowToDownRight4x2_centerbiased = "Ctrl+Num+3";
 
-              MoveWindowToUpLeft4x2_centerbiased = "Meta+Num+7";
-              MoveWindowToUpCenter4x2_centerbiased = "Meta+Num+8";
-              MoveWindowToUpRight4x2_centerbiased = "Meta+Num+9";
-              MoveWindowToLeftHeight4x2_centerbiased = "Meta+Num+4";
-              MoveWindowToCenterHeight4x2_centerbiased = "Meta+Num+5";
-              MoveWindowToRightHeight4x2_centerbiased = "Meta+Num+6";
-              MoveWindowToDownLeft4x2_centerbiased = "Meta+Num+1";
-              MoveWindowToDownCenter4x2_centerbiased = "Meta+Num+2";
-              MoveWindowToDownRight4x2_centerbiased = "Meta+Num+3";
+              # CTRL + Meta For Larger Center Than Default
+              # Ultrawide - Wider Center Layer [ 16 | 68 | 16 ]%
+              MoveWindowToUpLeft23_center_biased = "Ctrl+Meta+Num+7";
+              MoveWindowToUpCenter23_center_biased = "Ctrl+Meta+Num+8";
+              MoveWindowToUpRight23_center_biased = "Ctrl+Meta+Num+9";
+              MoveWindowToLeftHeight23_center_biased = "Ctrl+Meta+Num+4";
+              MoveWindowToCenterHeight23_center_biased = "Ctrl+Meta+Num+5";
+              MoveWindowToRightHeight23_center_biased = "Ctrl+Meta+Num+6";
+              MoveWindowToFitDownLeft23_center_biased = "Ctrl+Meta+Num+1";
+              MoveWindowToDownCenter23_center_biased = "Ctrl+Meta+Num+2";
+              MoveWindowToFitDownRight23_center_biased = "Ctrl+Meta+Num+3";
 
+              # CTRL + Alt For Smaller Center Than Default
+              # Ultrawide - Smaller Center Layer [ 33 | 33 | 33 ]%
+              MoveWindowToUpLeft3x2 = "Ctrl+Alt+Num+7";
+              MoveWindowToUpCenter3x2 = "Ctrl+Alt+Num+8";
+              MoveWindowToUpRight3x2 = "Ctrl+Alt+Num+9";
+              MoveWindowToLeftHeight3x2 = "Ctrl+Alt+Num+4";
+              MoveWindowToCenterHeight3x2 = "Ctrl+Alt+Num+5";
+              MoveWindowToRightHeight3x2 = "Ctrl+Alt+Num+6";
+              MoveWindowToDownLeft3x2 = "Ctrl+Alt+Num+1";
+              MoveWindowToDownCenter3x2 = "Ctrl+Alt+Num+2";
+              MoveWindowToDownRight3x2 = "Ctrl+Alt+Num+3";
+
+              # General
+              MoveWindowToMaximize = "Ctrl+Num+0";
+
+              # 1/2 Width
+              MoveWindowToUpLeft2x2 = "Meta+Num+7";
+              MoveWindowToUpCenter2x2 = "Meta+Num+8";
+              MoveWindowToUpRight2x2 = "Meta+Num+9";
+              MoveWindowToLeftHeight2x2 = "Meta+Num+4";
+              MoveWindowToCenter = "Meta+Num+5";
+              MoveWindowToRightHeight2x2 = "Meta+Num+6";
+              MoveWindowToDownLeft2x2 = "Meta+Num+1";
+              MoveWindowToDownCenter2x2 = "Meta+Num+2";
+              MoveWindowToDownRight2x2 = "Meta+Num+3";
+
+              # 2/3 Width
               MoveWindowToUpLeft23 = "Alt+Num+7";
               MoveWindowToUpCenter23 = "Alt+Num+8";
               MoveWindowToUpRight23 = "Alt+Num+9";
@@ -443,24 +483,13 @@
               MoveWindowToDownCenter23 = "Alt+Num+2";
               MoveWindowToFitDownRight23 = "Alt+Num+3";
 
-              MoveWindowToUpLeft23_center_biased = "Alt+Meta+Num+7";
-              MoveWindowToUpCenter23_center_biased = "Alt+Meta+Num+8";
-              MoveWindowToUpRight23_center_biased = "Alt+Meta+Num+9";
-              MoveWindowToLeftHeight23_center_biased = "Alt+Meta+Num+4";
-              MoveWindowToCenterHeight23_center_biased = "Alt+Meta+Num+5";
-              MoveWindowToRightHeight23_center_biased = "Alt+Meta+Num+6";
-              MoveWindowToFitDownLeft23_center_biased = "Alt+Meta+Num+1";
-              MoveWindowToDownCenter23_center_biased = "Alt+Meta+Num+2";
-              MoveWindowToFitDownRight23_center_biased = "Alt+Meta+Num+3";
-
-              MoveWindowToMaximize = "Meta+Num+0";
-              MoveWindowToCenter = "Ctrl+Num+5";
-              IncreaseWindowSize = "Ctrl+Meta+Num++";
-              DecreaseWindowSize = "Ctrl+Meta+Num+-";
-              MoveWindowLeft = "Ctrl+Meta+Left";
-              MoveWindowRight = "Ctrl+Meta+Right";
-              MoveWindowUp = "Ctrl+Meta+Up";
-              MoveWindowDown = "Ctrl+Meta+Down";
+              # Nudging
+              # IncreaseWindowSize = "Ctrl+Meta+Num++";
+              # DecreaseWindowSize = "Ctrl+Meta+Num+-";
+              # MoveWindowLeft = "Ctrl+Meta+Left";
+              # MoveWindowRight = "Ctrl+Meta+Right";
+              # MoveWindowUp = "Ctrl+Meta+Up";
+              # MoveWindowDown = "Ctrl+Meta+Down";
             };
           };
 
