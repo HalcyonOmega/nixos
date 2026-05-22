@@ -58,6 +58,7 @@
             DisplayServer = "wayland";
             Numlock = "on";
           };
+
           wayland = {
             enable = true;
             compositor = "kwin";
@@ -76,8 +77,6 @@
           pkgs.kdePackages.breeze-gtk
           pkgs.kdePackages.breeze-icons
           pkgs.kdePackages.filelight
-          # kdenlive
-          # plasma-browser-integration
         ];
 
         plasma6.excludePackages = [
@@ -483,7 +482,7 @@
               MoveWindowToDownCenter23 = "Alt+Num+2";
               MoveWindowToFitDownRight23 = "Alt+Num+3";
 
-              # Nudging
+              # Nudging - Already Defaults
               # IncreaseWindowSize = "Ctrl+Meta+Num++";
               # DecreaseWindowSize = "Ctrl+Meta+Num+-";
               # MoveWindowLeft = "Ctrl+Meta+Left";
