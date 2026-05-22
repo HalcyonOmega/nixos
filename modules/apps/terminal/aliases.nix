@@ -12,8 +12,8 @@
         code = "codium";
         nrs = "nh os switch";
         nrb = "nh os build";
-        update = "nrs";
-        upgrade = "nix flake update";
+        refresh = "nrs";
+        update = "nix flake update";
         build = "nh os build";
         clean = "nh clean all";
         build_iso = "nix run nixpkgs#nixos-generators -- --format iso --flake ~/nixos#iso -o result";
