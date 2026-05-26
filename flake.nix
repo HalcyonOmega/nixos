@@ -3,10 +3,12 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
+
     # Plasma beta releases generally land on master before they reach
     # nixos-unstable. Use this only through the dedicated test configuration.
     nixpkgs-plasma-beta.url = "github:NixOS/nixpkgs/master";
+
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
     disko = {
@@ -47,7 +49,17 @@
     };
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
 
-    brave-origin.url = "github:clementpoiret/brave-origin-flake";
+    brave-origin = {
+      url = "github:clementpoiret/brave-origin-flake";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
+    };
+
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
+
     helium-flake.url = "github:oxcl/nix-flake-helium-browser";
     helium-flake.inputs.nixpkgs.follows = "nixpkgs";
 

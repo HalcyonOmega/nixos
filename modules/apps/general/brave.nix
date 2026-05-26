@@ -8,7 +8,6 @@
     }:
     {
       home-manager.users.${username} = {
-        # home.packages = [ pkgs.vivaldi ];
 
         programs.brave = {
           enable = true;

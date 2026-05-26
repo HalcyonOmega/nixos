@@ -125,7 +125,7 @@
           hotkeys.commands."launch-web-browser" = {
             name = "Launch Web Browser";
             key = "Meta+Ctrl+Alt+Shift+B";
-            command = "brave-origin-beta";
+            command = "zen-beta";
           };
 
           hotkeys.commands."launch-file-browser" = {

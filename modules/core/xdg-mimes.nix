@@ -5,7 +5,7 @@
     with lib;
     let
       defaultApps = {
-        browser = [ "brave.desktop" ];
+        browser = [ "zen-beta.desktop" ];
         text = [ "kate.desktop" ];
         image = [ "imv-dir.desktop" ];
         audio = [ "mpv.desktop" ];
