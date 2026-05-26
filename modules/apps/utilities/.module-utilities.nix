@@ -9,6 +9,7 @@
         self.nixosModules.localsend
         self.nixosModules.solaar
         self.nixosModules.streamcontroller
+        self.nixosModules.tailscale
         self.nixosModules.vicinae
       ];
     };
