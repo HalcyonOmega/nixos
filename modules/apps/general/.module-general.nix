@@ -6,6 +6,7 @@
       imports = [
         self.nixosModules.brave
         self.nixosModules.discord
+        self.nixosModules.helium
         self.nixosModules.librewolf
         self.nixosModules.logseq
         self.nixosModules.onlyoffice

@@ -32,7 +32,7 @@
             efi.canTouchEfiVariables = true;
             limine = {
               enable = true;
-              biosSupport = true;
+              # biosSupport = true;
               maxGenerations = 10;
 
               # style = {

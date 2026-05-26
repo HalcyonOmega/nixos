@@ -9,7 +9,7 @@
     {
       home-manager.users.${username} = {
         programs.firefox = {
-          enable = true;
+          enable = false;
           package = pkgs.librewolf;
           policies = {
             DisableTelemetry = true;

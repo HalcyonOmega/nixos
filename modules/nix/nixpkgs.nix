@@ -9,6 +9,7 @@
           overlays = [
             inputs.nur.overlays.default
             inputs.nix-cachyos-kernel.overlays.default
+            inputs.helium-flake.overlays.default
           ];
         };
       };

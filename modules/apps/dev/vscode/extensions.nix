@@ -32,7 +32,7 @@
                 publisher = "openai";
                 name = "chatgpt";
                 version = "latest";
-                sha256 = "sha256-+VGA6KjQA7MttchkypFeIRKuehzHaABYPD01fo7dREM=";
+                sha256 = "sha256-hJhmLn3AvmY3X3RlbKlpeBX94w8PPm1cuPb3GNvgL/g=";
               }
             ];
         };

@@ -5,16 +5,52 @@
   self,
   ...
 }:
-{
-  flake.nixosConfigurations.halcyon = inputs.nixpkgs.lib.nixosSystem {
-    inherit system;
-    modules = [
-      ./_hardware-configuration.nix
-      self.nixosModules.halcyon
-    ];
+let
+  mkHalcyon =
+    {
+      name,
+      nixpkgs ? inputs.nixpkgs,
+      extraModules ? [ ],
+    }:
+    nixpkgs.lib.nixosSystem {
+      inherit system;
+      modules = [
+        ./_hardware-configuration.nix
+        self.nixosModules.halcyon
+      ] ++ extraModules;
 
-    specialArgs = commonArgs // {
-      host = "halcyon";
+      specialArgs = commonArgs // {
+        host = name;
+      };
+    };
+in
+{
+  flake.nixosConfigurations = {
+    halcyon = mkHalcyon {
+      name = "halcyon";
+    };
+
+    halcyon-plasma-beta = mkHalcyon {
+      name = "halcyon-plasma-beta";
+      nixpkgs = inputs.nixpkgs-plasma-beta;
+      extraModules = [
+        (
+          { lib, ... }:
+          {
+            nixpkgs.overlays = [
+              (import ../../../overlays/kde-plasma-6-7-beta.nix)
+            ];
+
+            services.displayManager = {
+              sddm.enable = lib.mkForce false;
+              plasma-login-manager.enable = true;
+            };
+
+            system.nixos.tags = [ "plasma-beta" ];
+            system.stateVersion = inputs.nixpkgs.lib.mkDefault "25.11";
+          }
+        )
+      ];
     };
   };
 
