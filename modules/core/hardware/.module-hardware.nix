@@ -11,6 +11,7 @@
         self.nixosModules.graphics
         self.nixosModules.keyboard
         self.nixosModules.mouse
+        self.nixosModules.smartcard
       ];
 
       environment.systemPackages = [
