@@ -11,6 +11,7 @@
         self.nixosModules.streamcontroller
         self.nixosModules.tailscale
         self.nixosModules.vicinae
+        self.nixosModules.winboat
       ];
     };
 }
