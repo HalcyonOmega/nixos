@@ -4,7 +4,12 @@
     { pkgs, username, ... }:
     {
       home-manager.users.${username} = {
-        home.packages = [ pkgs.winboat ];
+        home.packages = [
+          pkgs.freerdp
+          pkgs.opensc
+          pkgs.pcsc-tools
+          pkgs.winboat
+        ];
       };
     };
 }
