@@ -17,22 +17,29 @@
 
           home.activation.registerOpenScForChromium = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
             nssdb="$HOME/.pki/nssdb"
+            module_name="OpenSC PKCS#11"
+            module_path="${pkgs.opensc}/lib/pkcs11/opensc-pkcs11.so"
+
             mkdir -p "$nssdb"
 
             if ! ${pkgs.nssTools}/bin/certutil -d "sql:$nssdb" -L >/dev/null 2>&1; then
               ${pkgs.nssTools}/bin/certutil -d "sql:$nssdb" -N --empty-password
             fi
 
-            if ${pkgs.nssTools}/bin/modutil -dbdir "sql:$nssdb" -list |
-              ${pkgs.gnugrep}/bin/grep -q '^ *OpenSC PKCS#11'; then
-              ${pkgs.nssTools}/bin/modutil -dbdir "sql:$nssdb" -delete "OpenSC PKCS#11" -force
-            fi
+            if ! ${pkgs.gnugrep}/bin/grep -Fxq "library=$module_path" "$nssdb/pkcs11.txt" ||
+              ! ${pkgs.nssTools}/bin/modutil -dbdir "sql:$nssdb" -list |
+                ${pkgs.gnugrep}/bin/grep -Eq "^ *[0-9]+\\. $module_name$"; then
+              if ${pkgs.nssTools}/bin/modutil -dbdir "sql:$nssdb" -list |
+                ${pkgs.gnugrep}/bin/grep -Eq "^ *[0-9]+\\. $module_name$"; then
+                ${pkgs.nssTools}/bin/modutil -dbdir "sql:$nssdb" -delete "$module_name" -force
+              fi
 
-            ${pkgs.nssTools}/bin/modutil \
-              -dbdir "sql:$nssdb" \
-              -add "OpenSC PKCS#11" \
-              -libfile "${pkgs.opensc}/lib/pkcs11/opensc-pkcs11.so" \
-              -force
+              ${pkgs.nssTools}/bin/modutil \
+                -dbdir "sql:$nssdb" \
+                -add "$module_name" \
+                -libfile "$module_path" \
+                -force
+            fi
           '';
 
           programs.brave = {

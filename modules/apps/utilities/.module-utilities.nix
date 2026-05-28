@@ -5,6 +5,7 @@
     {
       imports = [
         self.nixosModules.bitwarden
+        self.nixosModules.docker
         self.nixosModules.gparted
         self.nixosModules.localsend
         self.nixosModules.solaar
