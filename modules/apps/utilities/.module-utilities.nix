@@ -8,7 +8,7 @@
         self.nixosModules.docker
         self.nixosModules.gparted
         self.nixosModules.localsend
-        self.nixosModules.remmina
+        # self.nixosModules.remmina
         self.nixosModules.solaar
         self.nixosModules.streamcontroller
         self.nixosModules.tailscale

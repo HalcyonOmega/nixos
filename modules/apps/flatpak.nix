@@ -13,6 +13,7 @@
       # 1. Declare the Flatpaks you *want* on your system
       desiredFlatpaks = [
         "com.github.tchx84.Flatseal"
+        "com.spotify.Client"
         "io.github.unknownskl.greenlight"
       ];
     in

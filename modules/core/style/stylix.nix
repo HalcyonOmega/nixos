@@ -14,6 +14,8 @@
 
         base16Scheme = ../../../assets/themes/reactor.yaml;
 
+        targets.kmscon.enable = false;
+
         #   opacity = {
         #     terminal = opacity;
         #     popups = opacity;

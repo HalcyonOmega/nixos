@@ -1,5 +1,6 @@
 { inputs, ... }:
 {
+  # Remote Desktop Client
   flake.nixosModules.remmina =
     { pkgs, username, ... }:
     {

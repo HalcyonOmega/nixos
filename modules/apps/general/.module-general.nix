@@ -8,8 +8,8 @@
         self.nixosModules.discord
         self.nixosModules.logseq
         self.nixosModules.onlyoffice
-        self.nixosModules.spicetify
-        self.nixosModules.thunderbird
+        # self.nixosModules.spicetify
+        # self.nixosModules.thunderbird
         self.nixosModules.zen
       ];
     };

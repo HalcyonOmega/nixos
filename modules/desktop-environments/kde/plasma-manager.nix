@@ -2,6 +2,7 @@
 {
   flake.nixosModules.plasma-manager =
     {
+      config,
       lib,
       pkgs,
       username,
@@ -40,7 +41,7 @@
           platforms = lib.platforms.linux;
         };
       });
-      # desktopWallpaper = ./../../../assets/wallpapers/vortex.jpg;
+      desktopWallpaper = config.stylix.image;
     in
     {
       programs.ydotool.enable = true;
@@ -56,7 +57,6 @@
           autoNumlock = true;
           settings.General = {
             DisplayServer = "wayland";
-            Numlock = "on";
           };
 
           wayland = {
@@ -64,6 +64,7 @@
             compositor = "kwin";
           };
         };
+
         desktopManager.plasma6.enable = true;
       };
 
@@ -107,7 +108,7 @@
             theme = "breeze-dark";
             colorScheme = "BreezeDark";
             iconTheme = "breeze-dark";
-            # wallpaper = desktopWallpaper;
+            wallpaper = desktopWallpaper;
           };
 
           hotkeys.commands."launch-terminal" = {
@@ -510,12 +511,27 @@
             kscreenlockerrc = {
               Greeter.WallpaperPlugin = "org.kde.image";
               "Greeter/Wallpaper/org.kde.image/General" = {
-                # Image = "file://${desktopWallpaper}";
-                # PreviewImage = "file://${desktopWallpaper}";
+                Image = "file://${toString desktopWallpaper}";
+                PreviewImage = "file://${toString desktopWallpaper}";
               };
             };
           };
         };
       };
+
+      environment.etc."xdg/kcminputrc".text = ''
+        [Keyboard]
+        NumLock=0
+      '';
+
+      environment.etc."plasmalogin.conf".text = ''
+        [Greeter]
+        WallpaperPluginId=org.kde.image
+
+        [Greeter][Wallpaper][org.kde.image][General]
+        FillMode=2
+        Image=file://${toString desktopWallpaper}
+        PreviewImage=file://${toString desktopWallpaper}
+      '';
     };
 }

@@ -6,8 +6,6 @@
       home-manager.users.${username} = {
         home.packages = [
           pkgs.freerdp
-          pkgs.opensc
-          pkgs.pcsc-tools
           pkgs.winboat
         ];
       };

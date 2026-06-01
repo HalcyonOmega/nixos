@@ -2,8 +2,8 @@
   description = "My NixOS Flake Configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Plasma beta releases generally land on master before they reach
     # nixos-unstable. Use this only through the dedicated test configuration.
@@ -51,7 +51,7 @@
 
     brave-origin = {
       url = "github:clementpoiret/brave-origin-flake";
-      inputs.nixpkgs.follows = "nixpkgs-stable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     zen-browser = {
@@ -80,7 +80,7 @@
       system = "x86_64-linux";
       githubUsername = "HalcyonOmega";
       githubEmail = "nathanbrown@me.com";
-      pkgs-stable = import inputs.nixpkgs-stable {
+      pkgs-unstable = import inputs.nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
       };
@@ -92,7 +92,7 @@
           system
           githubUsername
           githubEmail
-          pkgs-stable
+          pkgs-unstable
           ;
       };
     in
