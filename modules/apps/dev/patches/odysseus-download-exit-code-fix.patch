@@ -1,0 +1,15 @@
+diff --git a/routes/cookbook_routes.py b/routes/cookbook_routes.py
+--- a/routes/cookbook_routes.py
++++ b/routes/cookbook_routes.py
+@@ -633,10 +633,9 @@
+                 lines.append(hf_cmd)
+                 lines.append('_ec=$?; if [ $_ec -eq 0 ]; then echo ""; echo "DOWNLOAD_OK"; else echo ""; echo "DOWNLOAD_FAILED (exit $_ec)"; fi')
+             else:
+                 # < /dev/null suppresses interactive "update available? [Y/n]" prompt
+-                lines.append(f"exec > >(tee -a {shlex.quote(str(log_path))}) 2>&1")
+                 _append_hf_download_retry(lines, hf_cmd)
+-                lines.append('_ec=$?; if [ $_ec -eq 0 ]; then echo ""; echo "DOWNLOAD_OK"; else echo ""; echo "DOWNLOAD_FAILED (exit $_ec)"; fi')
++                lines.append('if [ $_ec -eq 0 ]; then echo ""; echo "DOWNLOAD_OK"; else echo ""; echo "DOWNLOAD_FAILED (exit $_ec)"; fi')
+                 lines.append(f"rm -f '{wrapper_script}'")
+                 lines.append('exec "${SHELL:-/bin/bash}"')
+                 wrapper_script.write_text("\n".join(lines) + "\n", encoding="utf-8")

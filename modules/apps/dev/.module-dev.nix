@@ -7,6 +7,7 @@
         self.nixosModules.cursor
         self.nixosModules.devenv
         self.nixosModules.nixd
+        self.nixosModules.odysseus
         self.nixosModules.vscode
       ];
     };

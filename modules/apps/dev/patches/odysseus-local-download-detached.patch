@@ -1,0 +1,53 @@
+diff --git a/routes/cookbook_routes.py b/routes/cookbook_routes.py
+--- a/routes/cookbook_routes.py
++++ b/routes/cookbook_routes.py
+@@ -621,5 +621,5 @@
+-            # Local: run hf download in the background (tmux on POSIX, a detached
+-            # process + logfile on Windows where tmux doesn't exist).
++            # Local: run hf download as a detached process with a durable logfile.
++            # tmux pane capture is too brittle for downloads that fail quickly.
+             if req.env_prefix:
+                 lines.append(_safe_env_prefix(req.env_prefix))
+             else:
+@@ -638,6 +638,5 @@
+                 _append_hf_download_retry(lines, hf_cmd)
+                 lines.append('if [ $_ec -eq 0 ]; then echo ""; echo "DOWNLOAD_OK"; else echo ""; echo "DOWNLOAD_FAILED (exit $_ec)"; fi')
+                 lines.append(f"rm -f '{wrapper_script}'")
+-                lines.append('exec "${SHELL:-/bin/bash}"')
+                 wrapper_script.write_text("\n".join(lines) + "\n", encoding="utf-8")
+                 wrapper_script.chmod(0o755)
+@@ -643,1 +642,1 @@
+-            setup_cmd = None if IS_WINDOWS else f"tmux new-session -d -s {session_id} {shlex.quote(str(wrapper_script))}"
++            setup_cmd = None
+@@ -649,2 +648,2 @@
+-        if setup_cmd is None:
+-            # LOCAL Windows: launch the bash wrapper detached; no tmux setup_cmd.
++        if setup_cmd is None:
++            # LOCAL download: launch the bash wrapper detached; no tmux setup_cmd.
+@@ -2095,11 +2091,11 @@
+-            elif IS_WINDOWS:
+-                # LOCAL Windows task: launched as a detached process (no tmux).
+-                # Liveness comes from the <session>.pid file, output from the
+-                # <session>.log file the wrapper redirects into. No subprocess.
++            elif not remote:
++                # LOCAL task: launched as a detached process (no tmux).
++                # Liveness comes from the <session>.pid file, output from the
++                # <session>.log file the wrapper redirects into. No subprocess.
+                 check_cmd = None
+                 capture_cmd = None
+             else:
+                 check_cmd = ["tmux", "has-session", "-t", session_id]
+                 capture_cmd = ["tmux", "capture-pane", "-t", session_id, "-p", "-S", "-50"]
+ 
+-            local_win_task = (not remote) and IS_WINDOWS
++            local_file_task = not remote
+@@ -2110,4 +2106,4 @@
+-            if local_win_task:
++            if local_file_task:
+                 # File-based liveness + output for the detached-process model.
+                 pid_path = TMUX_LOG_DIR / f"{session_id}.pid"
+                 log_path = TMUX_LOG_DIR / f"{session_id}.log"
+@@ -2176,2 +2172,2 @@
+-            if is_alive or ((local_win_task or not remote) and full_snapshot):
++            if is_alive or (local_file_task and full_snapshot):
+                 lower = full_snapshot.lower()

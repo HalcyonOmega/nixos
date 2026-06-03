@@ -8,6 +8,7 @@
         c = "clear";
         disk = "lsblk -f";
         ff = "fastfetch";
+        ody = "odysseus";
         nit = "nitch";
         code = "codium";
         nrs = "nh os switch";

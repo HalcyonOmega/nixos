@@ -1,0 +1,86 @@
+diff --git a/routes/cookbook_routes.py b/routes/cookbook_routes.py
+--- a/routes/cookbook_routes.py
++++ b/routes/cookbook_routes.py
+@@ -1955,24 +1955,38 @@
+-        def _download_cache_complete(repo_id: str, remote_host: str = "", ssh_port: str = "") -> bool:
+-            """Best-effort check for a completed HF cache entry.
++        def _download_cache_complete(repo_id: str, remote_host: str = "", ssh_port: str = "", local_dir: str = "") -> bool:
++            """Best-effort check for a completed HF cache or local-dir entry.
+ 
+             tmux output can stop at a stale progress line if the pane/session
+             disappears before Cookbook captures the final DOWNLOAD_OK marker.
+-            In that case, trust the cache shape: a snapshot directory with files
+-            and no *.incomplete blobs means HuggingFace finished materializing the
+-            model.
++            In that case, trust the filesystem shape. For normal HF cache
++            downloads, a populated snapshots directory with no *.incomplete blobs
++            means HuggingFace finished materializing the model. For custom
++            --local-dir downloads, a populated target directory with no
++            *.incomplete blobs means the same thing.
+             """
+             if not repo_id or "/" not in repo_id:
+                 return False
+             py = (
+                 "import os,sys;"
+                 "repo=sys.argv[1];"
++                "local=sys.argv[2] if len(sys.argv)>2 else '';"
++                "short=repo.rsplit('/',1)[-1];"
++                "def complete_dir(path):"
++                "    path=os.path.expanduser(path);"
++                "    if not os.path.isdir(path): return False;"
++                "    has_file=False; incomplete=False;"
++                "    for root,dirs,names in os.walk(path):"
++                "        if '.git' in dirs: dirs.remove('.git');"
++                "        for name in names:"
++                "            if name.endswith('.incomplete'): incomplete=True;"
++                "            else: has_file=True;"
++                "    return has_file and not incomplete;"
++                "if local and complete_dir(os.path.join(os.path.expanduser(local.rstrip('/')), short)): sys.exit(0);"
+                 "base=os.environ.get('HUGGINGFACE_HUB_CACHE') or os.path.join(os.environ.get('HF_HOME', os.path.expanduser('~/.cache/huggingface')), 'hub');"
+                 "d=os.path.join(base,'models--'+repo.replace('/','--'));"
+                 "snap=os.path.join(d,'snapshots');"
+-                "ok=os.path.isdir(snap) and any(os.path.isdir(os.path.join(snap,x)) and os.listdir(os.path.join(snap,x)) for x in os.listdir(snap));"
++                "ok=os.path.isdir(snap) and any(os.path.isdir(os.path.join(snap,x)) and complete_dir(os.path.join(snap,x)) for x in os.listdir(snap));"
+                 "inc=False;"
+                 "blobs=os.path.join(d,'blobs');"
+                 "inc=os.path.isdir(blobs) and any(x.endswith('.incomplete') for x in os.listdir(blobs));"
+                 "sys.exit(0 if ok and not inc else 1)"
+             )
+-            cmd = ["python3", "-c", py, repo_id]
++            cmd = ["python3", "-c", py, repo_id, local_dir or ""]
+@@ -2168,4 +2182,4 @@
+-                if task_type == "download" and _download_cache_complete(_payload.get("repo_id") or model, remote, str(_tport or "")):
++                if task_type == "download" and _download_cache_complete(_payload.get("repo_id") or model, remote, str(_tport or ""), _payload.get("local_dir") or ""):
+                     status = "completed"
+                     if not progress_text:
+                         progress_text = "Download complete"
+diff --git a/static/js/cookbookRunning.js b/static/js/cookbookRunning.js
+--- a/static/js/cookbookRunning.js
++++ b/static/js/cookbookRunning.js
+@@ -2414,5 +2414,26 @@
+ 
+         const lastOutput = output.textContent || '';
++        if (task.type === 'download') {
++          try {
++            const statusRes = await fetch('/api/cookbook/tasks/status', { credentials: 'same-origin' });
++            const statusData = await statusRes.json();
++            const serverTask = (statusData.tasks || []).find(t => t.session_id === task.sessionId);
++            if (serverTask?.status === 'completed') {
++              _updateTask(task.sessionId, { status: 'done', output: serverTask.output || lastOutput || 'Download complete' });
++              el.dataset.status = 'done';
++              const badge = el.querySelector('.cookbook-task-status');
++              if (badge) { badge.textContent = _statusLabel('done', task.type); badge.className = 'cookbook-task-status cookbook-task-done'; }
++              _showCookbookNotif(true);
++              break;
++            }
++            if (serverTask?.status === 'running') {
++              failCount = 0;
++              _updateTask(task.sessionId, { status: 'running', output: serverTask.output || lastOutput });
++              await new Promise(r => setTimeout(r, 5000));
++              continue;
++            }
++          } catch {}
++        }
+         const diag = _diagnose(lastOutput);
+         if (diag) {
+           let diagEl = el.querySelector('.cookbook-diagnosis');

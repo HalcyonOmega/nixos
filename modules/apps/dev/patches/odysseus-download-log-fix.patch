@@ -1,0 +1,21 @@
+diff --git a/routes/cookbook_routes.py b/routes/cookbook_routes.py
+--- a/routes/cookbook_routes.py
++++ b/routes/cookbook_routes.py
+@@ -438,6 +438,7 @@
+         # Build the shell wrapper — runs hf download directly in tmux (which is a TTY)
+         # No script/tee needed — we'll use tmux capture-pane to read output
+         lines = ["#!/bin/bash"]
++        lines.append(f"exec > >(tee -a {shlex.quote(str(log_path))}) 2>&1")
+         lines.extend(_user_shell_path_bootstrap())
+         if req.hf_token:
+             lines.append(f"export HF_TOKEN='{_bash_squote(req.hf_token)}'")
+@@ -599,7 +600,7 @@
+             runner_lines.append('  pip install -q filelock fsspec packaging pyyaml tqdm typer httpx requests hf_transfer 2>/dev/null')
+             runner_lines.append("  python3 -c 'import hf_transfer' 2>/dev/null && export HF_HUB_ENABLE_HF_TRANSFER=1")
+             runner_lines.append(f'  python3 -c "import os; from huggingface_hub import snapshot_download; snapshot_download(\'{req.repo_id}\'{_dl_pyarg}, max_workers={4 if req.disable_hf_transfer else 8})"')
+             runner_lines.append('fi')
+-            runner_lines.append('_ec=$?; if [ $_ec -eq 0 ]; then echo ""; echo "DOWNLOAD_OK"; else echo ""; echo "DOWNLOAD_FAILED (exit $_ec)"; fi')
++            runner_lines.append('if [ $_ec -eq 0 ]; then echo ""; echo "DOWNLOAD_OK"; else echo ""; echo "DOWNLOAD_FAILED (exit $_ec)"; fi')
+             runner_lines.append(f"rm -f {remote_runner}")
+             runner_lines.append('exec "${SHELL:-/bin/bash}"')
+             runner_path = TMUX_LOG_DIR / f"{session_id}_run.sh"
