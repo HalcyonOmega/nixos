@@ -15,7 +15,7 @@
         refresh = "nrs";
         update = "nix flake update";
         build = "nh os build";
-        clean = "nh clean all";
+        clean = "nh clean all && nix store optimise";
         build_iso = "nix run nixpkgs#nixos-generators -- --format iso --flake ~/nixos#iso -o result";
       };
     };

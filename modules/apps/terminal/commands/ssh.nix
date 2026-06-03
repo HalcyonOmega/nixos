@@ -16,21 +16,20 @@
           enableDefaultConfig = false;
 
           # Common SSH settings for all hosts (*)
-          matchBlocks = {
+          settings = {
             "*" = {
-              addKeysToAgent = "1h";
-              controlMaster = "auto";
-              controlPath = "~/.ssh/control-%r@%h:%p";
-              controlPersist = "10m";
+              AddKeysToAgent = "1h";
+              ControlMaster = "auto";
+              ControlPath = "~/.ssh/control-%r@%h:%p";
+              ControlPersist = "10m";
             };
 
-            github = {
-              host = "github.com";
-              hostname = "ssh.github.com";
-              user = "git";
-              port = 443;
-              identityFile = "~/.ssh/id_github";
-              identitiesOnly = true;
+            "github.com" = {
+              HostName = "ssh.github.com";
+              User = "git";
+              Port = 443;
+              IdentityFile = "~/.ssh/id_github";
+              IdentitiesOnly = true;
             };
           };
         };

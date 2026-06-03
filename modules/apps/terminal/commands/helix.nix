@@ -10,6 +10,11 @@
 
         stylix.targets.helix.enable = false;
 
+        home.sessionVariables = {
+          EDITOR = "hx";
+          VISUAL = "hx";
+        };
+
         programs.helix = {
           enable = true;
           settings = {
