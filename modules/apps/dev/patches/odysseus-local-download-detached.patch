@@ -1,53 +1,199 @@
-diff --git a/routes/cookbook_routes.py b/routes/cookbook_routes.py
---- a/routes/cookbook_routes.py
-+++ b/routes/cookbook_routes.py
-@@ -621,5 +621,5 @@
+--- a/routes/cookbook_routes.py	2026-06-04 07:24:56.676353076 -0400
++++ b/routes/cookbook_routes.py	2026-06-04 07:24:56.735946979 -0400
+@@ -344,9 +344,9 @@
+         return shutil.which(binary) is not None
+ 
+     def _launch_local_detached(session_id: str, bash_lines: list[str]) -> dict:
+-        """Windows-native stand-in for a LOCAL tmux session (tmux doesn't exist
+-        on Windows). Mirrors shell_routes._generate_win_detached / bg_jobs.launch:
+-        runs the wrapper detached so it survives a browser/SSE disconnect (the
++        """Local stand-in for a tmux session.
++
++        Runs the wrapper detached so it survives a browser/SSE disconnect (the
+         whole point of the tmux feature for long downloads/serves), writing a
+         <session>.log the status poller tails and a <session>.pid for liveness.
+ 
+@@ -467,7 +467,7 @@
+         local_windows = IS_WINDOWS and not remote
+         logger.info(f"Download request: repo={req.repo_id}, remote={remote}, ssh_port={req.ssh_port}, platform={req.platform}")
+ 
+-        if not is_windows and not local_windows and not await _binary_available("tmux", remote, req.ssh_port):
++        if remote and not is_windows and not await _binary_available("tmux", remote, req.ssh_port):
+             return {
+                 "ok": False,
+                 "error": _missing_binary_message("tmux", remote or "local server"),
+@@ -602,8 +602,8 @@
+                 f"ssh {_spf}{remote} 'chmod +x {remote_runner} && tmux new-session -d -s {session_id} \"./{remote_runner}\"'"
+             )
+         else:
 -            # Local: run hf download in the background (tmux on POSIX, a detached
 -            # process + logfile on Windows where tmux doesn't exist).
-+            # Local: run hf download as a detached process with a durable logfile.
-+            # tmux pane capture is too brittle for downloads that fail quickly.
++            # Local: run hf download detached with a durable logfile. tmux pane
++            # capture is too brittle for downloads that fail before the pane is read.
              if req.env_prefix:
                  lines.append(_safe_env_prefix(req.env_prefix))
              else:
-@@ -638,6 +638,5 @@
-                 _append_hf_download_retry(lines, hf_cmd)
-                 lines.append('if [ $_ec -eq 0 ]; then echo ""; echo "DOWNLOAD_OK"; else echo ""; echo "DOWNLOAD_FAILED (exit $_ec)"; fi')
+@@ -621,16 +621,15 @@
+                 lines.append(f"{hf_cmd} < /dev/null")
+                 lines.append('_ec=$?; if [ $_ec -eq 0 ]; then echo ""; echo "DOWNLOAD_OK"; else echo ""; echo "DOWNLOAD_FAILED (exit $_ec)"; fi')
                  lines.append(f"rm -f '{wrapper_script}'")
 -                lines.append('exec "${SHELL:-/bin/bash}"')
                  wrapper_script.write_text("\n".join(lines) + "\n", encoding="utf-8")
                  wrapper_script.chmod(0o755)
-@@ -643,1 +642,1 @@
 -            setup_cmd = None if IS_WINDOWS else f"tmux new-session -d -s {session_id} {shlex.quote(str(wrapper_script))}"
 +            setup_cmd = None
-@@ -649,2 +648,2 @@
--        if setup_cmd is None:
+ 
+         logger.info(f"Model download: {req.repo_id} (include={req.include}, session={session_id}, remote={remote})")
+         logger.info(f"Download setup_cmd: {setup_cmd}")
+ 
+         if setup_cmd is None:
 -            # LOCAL Windows: launch the bash wrapper detached; no tmux setup_cmd.
-+        if setup_cmd is None:
 +            # LOCAL download: launch the bash wrapper detached; no tmux setup_cmd.
-@@ -2095,11 +2091,11 @@
+             try:
+                 _launch_local_detached(session_id, lines)
+             except Exception as e:
+@@ -939,7 +938,7 @@
+         # process path below), regardless of the UI-supplied platform.
+         local_windows = IS_WINDOWS and not remote
+ 
+-        if not is_windows and not local_windows and not await _binary_available("tmux", remote, req.ssh_port):
++        if remote and not is_windows and not await _binary_available("tmux", remote, req.ssh_port):
+             return {
+                 "ok": False,
+                 "error": _missing_binary_message("tmux", remote or "local server"),
+@@ -1010,6 +1009,9 @@
+             # shell resolves the bundled python3/hf, mirroring the download flow.
+             if not remote:
+                 runner_lines.append(_local_tooling_path_export(sys.executable))
++                runner_lines.append('if [ -n "${ODYSSEUS_NIX_LLAMA_CPP_BIN:-}" ]; then export PATH="$ODYSSEUS_NIX_LLAMA_CPP_BIN:$PATH"; fi')
++                runner_lines.append('echo "[odysseus] PATH preflight: $(printf %s "$PATH" | cut -c1-500)"')
++                runner_lines.append('echo "[odysseus] llama-server: $(command -v llama-server || true)"')
+             runner_lines.append("export FLASHINFER_DISABLE_VERSION_CHECK=1")
+             if req.hf_token:
+                 runner_lines.append(f"export HF_TOKEN='{_bash_squote(req.hf_token)}'")
+@@ -1159,17 +1161,18 @@
+                 runner_lines.append('fi')
+ 
+             if not handled_ollama_serve:
++                local_detached_serve = not remote
+                 _append_serve_preflight_exit_lines(
+                     runner_lines,
+-                    keep_shell_open=not local_windows,
++                    keep_shell_open=not local_detached_serve,
+                 )
+                 runner_lines.append(req.cmd)
+-                if local_windows:
++                if local_detached_serve:
+                     # Detached background process — no interactive shell to keep open.
+                     # Print the exit marker the status poller looks for, then stop.
+                     _append_serve_exit_code_lines(runner_lines, keep_shell_open=False)
+                 else:
+-                    # Keep shell open after exit so user can see errors
++                    # Remote tmux pane stays open after exit so user can see errors.
+                     _append_serve_exit_code_lines(runner_lines, keep_shell_open=True)
+ 
+             runner_path = TMUX_LOG_DIR / f"{session_id}_run.sh"
+@@ -1178,8 +1181,8 @@
+             # regardless of the executable bit.
+             safe_chmod(runner_path, 0o755)
+ 
+-            if local_windows:
+-                # LOCAL Windows: launch the bash runner detached (tmux replacement).
++            if not remote:
++                # LOCAL serve: launch detached with a durable logfile/PID.
+                 setup_cmd = None
+             elif remote:
+                 remote_runner = f".{session_id}_run.sh"
+@@ -1208,7 +1211,7 @@
+                 setup_cmd = f"tmux new-session -d -s {session_id} {shlex.quote(str(runner_path))}"
+ 
+         if setup_cmd is None:
+-            # LOCAL Windows: launch the bash runner detached; no tmux setup_cmd.
++            # LOCAL serve: launch the bash runner detached; no tmux setup_cmd.
+             try:
+                 _launch_local_detached(session_id, runner_lines)
+             except Exception as e:
+@@ -2062,8 +2065,8 @@
+                     ssh_base.extend(["-p", str(_tport)])
+                 check_cmd = ssh_base + [remote, "tmux", "has-session", "-t", session_id]
+                 capture_cmd = ssh_base + [remote, "tmux", "capture-pane", "-t", session_id, "-p", "-S", "-50"]
 -            elif IS_WINDOWS:
 -                # LOCAL Windows task: launched as a detached process (no tmux).
--                # Liveness comes from the <session>.pid file, output from the
--                # <session>.log file the wrapper redirects into. No subprocess.
-+            elif not remote:
-+                # LOCAL task: launched as a detached process (no tmux).
-+                # Liveness comes from the <session>.pid file, output from the
-+                # <session>.log file the wrapper redirects into. No subprocess.
++            elif task_type in {"download", "serve"} and not remote:
++                # LOCAL long-running task: launched as a detached process (no tmux).
+                 # Liveness comes from the <session>.pid file, output from the
+                 # <session>.log file the wrapper redirects into. No subprocess.
                  check_cmd = None
-                 capture_cmd = None
-             else:
+@@ -2072,12 +2075,12 @@
                  check_cmd = ["tmux", "has-session", "-t", session_id]
                  capture_cmd = ["tmux", "capture-pane", "-t", session_id, "-p", "-S", "-50"]
  
 -            local_win_task = (not remote) and IS_WINDOWS
-+            local_file_task = not remote
-@@ -2110,4 +2106,4 @@
++            local_file_task = task_type in {"download", "serve"} and not remote
+ 
+             progress_text = ""
+             full_snapshot = ""
+ 
 -            if local_win_task:
 +            if local_file_task:
                  # File-based liveness + output for the detached-process model.
                  pid_path = TMUX_LOG_DIR / f"{session_id}.pid"
                  log_path = TMUX_LOG_DIR / f"{session_id}.log"
-@@ -2176,2 +2172,2 @@
--            if is_alive or ((local_win_task or not remote) and full_snapshot):
+@@ -2130,7 +2133,7 @@
+             # when the PID is gone instead of blindly reporting "stopped".
+             download_zero_files = False
+             status = "unknown"
+-            if is_alive or (local_win_task and full_snapshot):
 +            if is_alive or (local_file_task and full_snapshot):
                  lower = full_snapshot.lower()
+                 exit_match = re.search(r"=== process exited with code\s+(-?\d+)", full_snapshot, re.I)
+                 has_exit = exit_match is not None
+--- a/static/js/cookbook.js	2026-06-04 07:24:56.684348648 -0400
++++ b/static/js/cookbook.js	2026-06-04 07:24:56.732366708 -0400
+@@ -488,7 +488,6 @@
+       cmd += _lcpServer;
+     } else {
+       cmd += `${lcPrefix}llama-server --model ${modelArg} --host 0.0.0.0 --port ${f.port || '8080'} -ngl ${f.ngl || '99'} -c ${f.ctx || '8192'}${_lcExtra}`;
+-      cmd += ` || ${_lcpServer}`;
+     }
+   } else if (backend === 'ollama') {
+     const ollamaPort = f.port || '11434';
+--- a/static/js/cookbookRunning.js	2026-06-04 07:24:56.684348648 -0400
++++ b/static/js/cookbookRunning.js	2026-06-04 07:24:56.732366708 -0400
+@@ -2389,6 +2389,36 @@
+       const data = await res.json();
+ 
+       if (data.exit_code !== 0) {
++        if (task.type === 'serve' || task.type === 'download') {
++          try {
++            const statusRes = await fetch('/api/cookbook/tasks/status', { credentials: 'same-origin' });
++            const statusData = await statusRes.json();
++            const serverTask = (statusData.tasks || []).find(t => t.session_id === task.sessionId);
++            if (serverTask && ['running', 'ready', 'completed'].includes(serverTask.status)) {
++              failCount = 0;
++              const nextStatus = serverTask.status === 'completed' ? 'done' : serverTask.status;
++              const nextOutput = serverTask.output_tail || serverTask.output || output.textContent || '';
++              const updates = {
++                status: nextStatus,
++                output: nextOutput,
++                progress: serverTask.progress || serverTask.phase || task.progress || '',
++              };
++              if (task.type === 'serve' && serverTask.status === 'ready') updates._serveReady = true;
++              _updateTask(task.sessionId, updates);
++              Object.assign(task, updates);
++              el.dataset.status = nextStatus;
++              if (nextOutput) output.textContent = nextOutput;
++              const badge = el.querySelector('.cookbook-task-status');
++              if (badge) {
++                const b = _taskBadge(task);
++                badge.textContent = b.text;
++                badge.className = `cookbook-task-status ${b.cls}`;
++              }
++              await new Promise(r => setTimeout(r, 5000));
++              continue;
++            }
++          } catch {}
++        }
+         failCount++;
+         if (failCount < 5) {
+           await new Promise(r => setTimeout(r, 5000));

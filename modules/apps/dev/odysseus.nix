@@ -8,9 +8,13 @@
       ...
     }:
     let
+      llamaCpp = pkgs.llama-cpp.override {
+        rocmSupport = true;
+      };
+
       odysseus = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
         pname = "odysseus";
-        version = "unstable-2026-06-03-6";
+        version = "unstable-2026-06-04-6";
 
         src = pkgs.fetchFromGitHub {
           owner = "pewdiepie-archdaemon";
@@ -50,6 +54,7 @@
             python-multipart
             qrcode
             sqlalchemy
+            starlette-context
             uvicorn
             youtube-transcript-api
           ]
@@ -58,10 +63,6 @@
         dontBuild = true;
 
         patches = [
-          ./patches/odysseus-download-status.patch
-          ./patches/odysseus-download-retry-log.patch
-          ./patches/odysseus-download-log-fix.patch
-          ./patches/odysseus-download-exit-code-fix.patch
           ./patches/odysseus-local-download-detached.patch
         ];
 
@@ -79,7 +80,7 @@
             lib.makeBinPath [
               finalAttrs.python
               pkgs.nodejs
-              pkgs.llama-cpp
+              llamaCpp
               pkgs.tmux
             ]
           }:\$PATH"
@@ -90,6 +91,7 @@
           export HUGGINGFACE_HUB_CACHE="\''${HUGGINGFACE_HUB_CACHE:-\$HF_HOME/hub}"
           export HF_XET_CACHE="\''${HF_XET_CACHE:-\$HF_HOME/xet}"
           export HF_HUB_DISABLE_XET="\''${HF_HUB_DISABLE_XET:-1}"
+          export ODYSSEUS_NIX_LLAMA_CPP_BIN="${llamaCpp}/bin"
           mkdir -p "\$HUGGINGFACE_HUB_CACHE" "\$HF_XET_CACHE/logs"
 
           case "\''${DEBUG:-}" in
