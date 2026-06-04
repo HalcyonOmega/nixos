@@ -6,7 +6,7 @@
       imports = [
         self.nixosModules.bitwarden
         self.nixosModules.docker
-        self.nixosModules.flameshot
+        # self.nixosModules.flameshot
         self.nixosModules.gparted
         self.nixosModules.localsend
         self.nixosModules.qalculate

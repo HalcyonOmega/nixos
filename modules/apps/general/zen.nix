@@ -15,6 +15,21 @@
               "OpenSC PKCS#11" = "${pkgs.opensc}/lib/pkcs11/opensc-pkcs11.so";
             };
 
+            Preferences = {
+              "signon.rememberSignons" = {
+                Value = false;
+                Status = "locked";
+              };
+              "signon.autofillForms" = {
+                Value = false;
+                Status = "locked";
+              };
+              "signon.generation.enabled" = {
+                Value = false;
+                Status = "locked";
+              };
+            };
+
             ExtensionSettings = {
               "uBlock0@raymondhill.net" = {
                 install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";

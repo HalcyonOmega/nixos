@@ -41,6 +41,77 @@
           platforms = lib.platforms.linux;
         };
       });
+      mediaPlaybackInhibit = pkgs.writeShellScript "media-playback-inhibit" ''
+        set -eu
+
+        inhibit_pid=
+        screensaver_cookie=
+
+        cleanup() {
+          if [ -n "''${screensaver_cookie:-}" ]; then
+            ${pkgs.glib}/bin/gdbus call --session \
+              --dest org.freedesktop.ScreenSaver \
+              --object-path /ScreenSaver \
+              --method org.freedesktop.ScreenSaver.UnInhibit \
+              "$screensaver_cookie" >/dev/null 2>&1 || true
+          fi
+
+          if [ -n "''${inhibit_pid:-}" ]; then
+            kill "$inhibit_pid" >/dev/null 2>&1 || true
+            wait "$inhibit_pid" >/dev/null 2>&1 || true
+          fi
+        }
+
+        trap cleanup EXIT INT TERM
+
+        is_playing() {
+          ${pkgs.playerctl}/bin/playerctl --all-players status 2>/dev/null | ${pkgs.gnugrep}/bin/grep -qx Playing
+        }
+
+        inhibit_screensaver() {
+          ${pkgs.glib}/bin/gdbus call --session \
+            --dest org.freedesktop.ScreenSaver \
+            --object-path /ScreenSaver \
+            --method org.freedesktop.ScreenSaver.Inhibit \
+            media-playback-inhibit "Media is playing" 2>/dev/null \
+            | ${pkgs.gnused}/bin/sed -n 's/.*uint32 \([0-9]\+\).*/\1/p'
+        }
+
+        while true; do
+          if is_playing; then
+            if [ -z "''${inhibit_pid:-}" ] || ! kill -0 "$inhibit_pid" >/dev/null 2>&1; then
+              ${pkgs.systemd}/bin/systemd-inhibit \
+                --what=sleep:idle \
+                --mode=block \
+                --who=media-playback-inhibit \
+                --why="Media is playing" \
+                ${pkgs.coreutils}/bin/sleep infinity &
+              inhibit_pid=$!
+            fi
+
+            if [ -z "''${screensaver_cookie:-}" ]; then
+              screensaver_cookie="$(inhibit_screensaver || true)"
+            fi
+          else
+            if [ -n "''${screensaver_cookie:-}" ]; then
+              ${pkgs.glib}/bin/gdbus call --session \
+                --dest org.freedesktop.ScreenSaver \
+                --object-path /ScreenSaver \
+                --method org.freedesktop.ScreenSaver.UnInhibit \
+                "$screensaver_cookie" >/dev/null 2>&1 || true
+              screensaver_cookie=
+            fi
+
+            if [ -n "''${inhibit_pid:-}" ]; then
+              kill "$inhibit_pid" >/dev/null 2>&1 || true
+              wait "$inhibit_pid" >/dev/null 2>&1 || true
+              inhibit_pid=
+            fi
+          fi
+
+          ${pkgs.coreutils}/bin/sleep 10
+        done
+      '';
       desktopWallpaper = config.stylix.image;
     in
     {
@@ -90,8 +161,25 @@
       home-manager.users.${username} = {
         home.packages = [
           pkgs.phinger-cursors
+          pkgs.playerctl
           ultrawideWindows
         ];
+
+        systemd.user.services.media-playback-inhibit = {
+          Unit = {
+            Description = "Prevent sleep and locking while media is playing";
+            After = [ "graphical-session.target" ];
+            PartOf = [ "graphical-session.target" ];
+          };
+
+          Service = {
+            ExecStart = "${mediaPlaybackInhibit}";
+            Restart = "always";
+            RestartSec = 5;
+          };
+
+          Install.WantedBy = [ "graphical-session.target" ];
+        };
 
         programs.plasma = {
           enable = true;
