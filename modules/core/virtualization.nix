@@ -6,9 +6,10 @@
       # User groups are managed in user.nix to avoid conflicts
       # users.users.${username}.extraGroups = [ "libvirtd" ];
 
-      # Install necessary packages
+      programs.virt-manager.enable = true;
+
+      # Install additional virtualization tools and guest integration packages
       environment.systemPackages = [
-        pkgs.virt-manager
         pkgs.virt-viewer
         pkgs.spice
         pkgs.spice-gtk
@@ -22,6 +23,7 @@
         libvirtd = {
           enable = true;
           qemu = {
+            runAsRoot = false;
             swtpm.enable = true;
           };
         };
