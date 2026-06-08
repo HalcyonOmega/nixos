@@ -85,6 +85,12 @@ final: prev: {
         ) oldAttrs.patches;
       });
 
+      plasma-keyboard = kprev.plasma-keyboard.overrideAttrs (oldAttrs: {
+        buildInputs = (oldAttrs.buildInputs or [ ]) ++ [
+          kfinal.libplasma
+        ];
+      });
+
       plasma-workspace = kprev.plasma-workspace.overrideAttrs (oldAttrs: {
         patches = [
           ./patches/plasma-workspace-6.6.90-dependency-paths.patch

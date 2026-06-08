@@ -14,13 +14,13 @@
 
       odysseus = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
         pname = "odysseus";
-        version = "unstable-2026-06-04-6";
+        version = "unstable-2026-06-08";
 
         src = pkgs.fetchFromGitHub {
           owner = "pewdiepie-archdaemon";
           repo = "odysseus";
           rev = "main";
-          hash = "sha256-KYhj7tL/Wld1SJYZCHEbnHnXE0BfTiW5zD37sBsKKCk=";
+          hash = "sha256-kmA4Va+aGP0pePvZZhiAe0+x7PsEN9UxwcEeXppfyBs=";
         };
 
         python = pkgs.python3.withPackages (
