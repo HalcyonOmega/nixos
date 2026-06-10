@@ -7,14 +7,16 @@
         inputs.stylix.nixosModules.stylix
       ];
 
+      disabledModules = [
+        "${inputs.stylix}/modules/kmscon/nixos.nix"
+      ];
+
       stylix = {
         enable = true;
         image = ../../../assets/wallpapers/vortex.jpg;
         polarity = "dark";
 
         base16Scheme = ../../../assets/themes/reactor.yaml;
-
-        targets.kmscon.enable = false;
 
         #   opacity = {
         #     terminal = opacity;

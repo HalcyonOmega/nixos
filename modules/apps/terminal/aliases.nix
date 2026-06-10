@@ -18,6 +18,10 @@
         build = "nh os build";
         clean = "nh clean all && nix store optimise";
         build_iso = "nix run nixpkgs#nixos-generators -- --format iso --flake ~/nixos#iso -o result";
+        zed = "zeditor";
+        nixos = "code ~/nixos";
+        de = "devenv shell";
+        shell = "devenv shell";
       };
     };
 }

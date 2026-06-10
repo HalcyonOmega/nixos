@@ -67,6 +67,11 @@
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nexos = {
+      url = "github:HalcyonOmega/nexos/dev";
+      inputs.nexpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

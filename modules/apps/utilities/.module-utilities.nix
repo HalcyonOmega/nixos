@@ -9,6 +9,7 @@
         # self.nixosModules.flameshot
         self.nixosModules.gparted
         self.nixosModules.localsend
+        self.nixosModules.nexos-manager
         self.nixosModules.qalculate
         # self.nixosModules.remmina
         self.nixosModules.solaar
