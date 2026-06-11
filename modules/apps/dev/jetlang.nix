@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.nixosModules.lexlang =
+  flake.nixosModules.jetlang =
     {
       inputs,
       system,
@@ -8,12 +8,12 @@
       ...
     }:
     let
-      lex = inputs.lexlang.packages.${system}.lex;
+      jet = inputs.jetlang.packages.${system}.jet;
     in
     {
       home-manager.users.${username} = {
         home.packages = [
-          lex
+          jet
         ];
       };
     };
