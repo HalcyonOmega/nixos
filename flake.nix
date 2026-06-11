@@ -73,7 +73,7 @@
       inputs.nexpkgs.follows = "nixpkgs";
     };
 
-    lexlang.url = "github:HalcyonOmega/lex-lang";
+    lexlang.url = "github:HalcyonOmega/lex-lang/362907a40c8e89d9f88105755945bbdbe65a7745";
   };
 
   outputs =
