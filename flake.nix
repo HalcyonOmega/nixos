@@ -72,6 +72,8 @@
       url = "github:HalcyonOmega/nexos/dev";
       inputs.nexpkgs.follows = "nixpkgs";
     };
+
+    lexlang.url = "github:HalcyonOmega/lex-lang";
   };
 
   outputs =

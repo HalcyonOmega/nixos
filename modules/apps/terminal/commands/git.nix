@@ -29,8 +29,8 @@
             url = {
               "git@github.com:".insteadOf = [
                 "gh:"
+                "https://github.com/"
               ];
-              "git@github.com:${githubUsername}/".insteadOf = "https://github.com/${githubUsername}/";
               "git@github.com:frost-phoenix/".insteadOf = "fp:";
             };
             core.excludesFile = "/home/${username}/.config/git/.gitignore";
