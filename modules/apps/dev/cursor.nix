@@ -54,6 +54,7 @@
               nixIde
               arrterian.nix-env-selector
               ms-vscode-remote.remote-containers
+              pkgs.vscode-marketplace.anthropic.claude-code
               jetVscodeExtension
             ];
             userSettings = {
@@ -71,8 +72,6 @@
                   };
                 };
               };
-
-              "jet.languageServerPath" = "${jetRoot}/.nix/bin/jet";
             };
           };
         };

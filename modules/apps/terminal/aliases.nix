@@ -22,6 +22,7 @@
         nixos = "code ~/nixos";
         de = "devenv shell";
         shell = "devenv shell";
+        dev = "nex develop";
       };
     };
 }

@@ -46,6 +46,7 @@
               golang.go
               ms-vscode.cmake-tools
               llvm-vs-code-extensions.vscode-clangd
+              pkgs.vscode-marketplace.anthropic.claude-code
               jetVscodeExtension
             ]
             ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [

@@ -585,8 +585,8 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1781278402,
-        "narHash": "sha256-bLjHppGiApepVOiUoNIcl+E3ooXTmAV05OKOpe9FV3g=",
+        "lastModified": 1781283528,
+        "narHash": "sha256-Li5aOlssJJAigVEV7HeHMDlLW0puEWPGW/5EeDkAh4Y=",
         "path": "/home/nate/Projects/Github/jet",
         "type": "path"
       },
