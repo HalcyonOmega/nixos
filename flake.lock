@@ -585,17 +585,14 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1781210613,
-        "narHash": "sha256-8K0HrrOkiVNW7FZk2hz0Q4k2f1G/Epeqz5/4DqPfk4w=",
-        "owner": "jet-language",
-        "repo": "jet",
-        "rev": "fd1648f6ffd956ea5771c34a2d56a62428541715",
-        "type": "github"
+        "lastModified": 1781278402,
+        "narHash": "sha256-bLjHppGiApepVOiUoNIcl+E3ooXTmAV05OKOpe9FV3g=",
+        "path": "/home/nate/Projects/Github/jet",
+        "type": "path"
       },
       "original": {
-        "owner": "jet-language",
-        "repo": "jet",
-        "type": "github"
+        "path": "/home/nate/Projects/Github/jet",
+        "type": "path"
       }
     },
     "nexos": {

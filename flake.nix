@@ -73,7 +73,7 @@
       inputs.nexpkgs.follows = "nixpkgs";
     };
 
-    jetlang.url = "github:jet-language/jet";
+    jetlang.url = "path:/home/nate/Projects/Github/jet";
   };
 
   outputs =

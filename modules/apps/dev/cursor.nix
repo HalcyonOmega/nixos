@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 {
   flake.nixosModules.cursor =
     {
@@ -8,6 +8,26 @@
       ...
     }:
     let
+      jetRoot = "/home/${username}/Projects/Github/jet";
+      jetVscodeExtension = pkgs.vscode-utils.buildVscodeExtension {
+        pname = "jet-lang-jet";
+        version = "0.1.0";
+        src = inputs.jetlang + "/editors/vscode";
+        sourceRoot = "vscode";
+
+        npmDeps = pkgs.importNpmLock {
+          npmRoot = inputs.jetlang + "/editors/vscode";
+        };
+        nativeBuildInputs = [
+          pkgs.nodejs
+          pkgs.importNpmLock.npmConfigHook
+        ];
+
+        vscodeExtUniqueId = "jet-lang.jet";
+        vscodeExtPublisher = "jet-lang";
+        vscodeExtName = "jet";
+      };
+
       # Cursor 3.2.x embeds VS Code 1.105; nixpkgs nix-ide 0.5.9 requires >=1.112 and is skipped.
       nixIde = pkgs.vscode-extensions.jnoortheen.nix-ide.overrideAttrs (old: {
         postInstall = (old.postInstall or "") + ''
@@ -34,6 +54,7 @@
               nixIde
               arrterian.nix-env-selector
               ms-vscode-remote.remote-containers
+              jetVscodeExtension
             ];
             userSettings = {
               "window.titleBarStyle" = "custom";
@@ -50,6 +71,8 @@
                   };
                 };
               };
+
+              "jet.languageServerPath" = "${jetRoot}/.nix/bin/jet";
             };
           };
         };

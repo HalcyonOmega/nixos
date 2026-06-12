@@ -6,6 +6,26 @@
       username,
       ...
     }:
+    let
+      jetVscodeExtension = pkgs.vscode-utils.buildVscodeExtension {
+        pname = "jet-lang-jet";
+        version = "0.1.0";
+        src = inputs.jetlang + "/editors/vscode";
+        sourceRoot = "vscode";
+
+        npmDeps = pkgs.importNpmLock {
+          npmRoot = inputs.jetlang + "/editors/vscode";
+        };
+        nativeBuildInputs = [
+          pkgs.nodejs
+          pkgs.importNpmLock.npmConfigHook
+        ];
+
+        vscodeExtUniqueId = "jet-lang.jet";
+        vscodeExtPublisher = "jet-lang";
+        vscodeExtName = "jet";
+      };
+    in
     {
       home-manager.users.${username} = {
         programs.vscodium.profiles.default = {
@@ -26,6 +46,7 @@
               golang.go
               ms-vscode.cmake-tools
               llvm-vs-code-extensions.vscode-clangd
+              jetVscodeExtension
             ]
             ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
               {
