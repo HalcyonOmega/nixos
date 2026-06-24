@@ -5,8 +5,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    # Plasma beta releases generally land on master before they reach
-    # nixos-unstable. Use this only through the dedicated test configuration.
+    # Plasma 6.7+ lands on master before nixos-unstable. Use only via
+    # halcyon-plasma-beta until it reaches the stable channel inputs.
     nixpkgs-plasma-beta.url = "github:NixOS/nixpkgs/master";
 
     flake-parts.url = "github:hercules-ci/flake-parts";

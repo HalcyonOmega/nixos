@@ -810,11 +810,11 @@
     },
     "nixpkgs-plasma-beta": {
       "locked": {
-        "lastModified": 1780925302,
-        "narHash": "sha256-4ISpSCVglFoTJMVSjJzEHgMIU9ltyT4Vn5RQ0Qmq97k=",
+        "lastModified": 1782292304,
+        "narHash": "sha256-bYb3n4Fcw3rXGVQ3F6DKw2QgcfzJlNd6srja/EyFWiE=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "5b0f84aa7349e94bd4f846dc4fb3606abfeaf45a",
+        "rev": "fc608208a3595719d4a165767d6201de03e21768",
         "type": "github"
       },
       "original": {

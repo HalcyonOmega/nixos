@@ -37,16 +37,12 @@ in
         (
           { lib, ... }:
           {
-            nixpkgs.overlays = [
-              (import ../../../overlays/kde-plasma-6-7-beta.nix)
-            ];
-
             services.displayManager = {
               sddm.enable = lib.mkForce false;
               plasma-login-manager.enable = true;
             };
 
-            system.nixos.tags = [ "plasma-beta" ];
+            system.nixos.tags = [ "plasma-67" ];
             system.stateVersion = inputs.nixpkgs.lib.mkDefault "25.11";
           }
         )
