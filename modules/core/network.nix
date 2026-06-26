@@ -17,6 +17,7 @@
             22
             80
             443
+            7878
             53317 # Localsend
           ];
           allowedUDPPorts = [
