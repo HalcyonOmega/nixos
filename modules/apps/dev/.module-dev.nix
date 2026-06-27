@@ -4,6 +4,8 @@
     { ... }:
     {
       imports = [
+        self.nixosModules.claude
+        self.nixosModules.codex
         self.nixosModules.cursor
         self.nixosModules.devenv
         self.nixosModules.jetlang
