@@ -112,6 +112,64 @@
           ${pkgs.coreutils}/bin/sleep 10
         done
       '';
+      keepAwake = pkgs.writeShellScript "keep-awake" ''
+        set -eu
+
+        inhibit_pid=
+        screensaver_cookie=
+        policy_cookie=
+
+        cleanup() {
+          if [ -n "''${policy_cookie:-}" ]; then
+            ${pkgs.systemd}/bin/busctl --user call org.kde.Solid.PowerManagement \
+              /org/kde/Solid/PowerManagement/PolicyAgent \
+              org.kde.Solid.PowerManagement.PolicyAgent \
+              ReleaseInhibition u "$policy_cookie" >/dev/null 2>&1 || true
+          fi
+
+          if [ -n "''${screensaver_cookie:-}" ]; then
+            ${pkgs.glib}/bin/gdbus call --session \
+              --dest org.freedesktop.ScreenSaver \
+              --object-path /ScreenSaver \
+              --method org.freedesktop.ScreenSaver.UnInhibit \
+              "$screensaver_cookie" >/dev/null 2>&1 || true
+          fi
+
+          if [ -n "''${inhibit_pid:-}" ]; then
+            kill "$inhibit_pid" >/dev/null 2>&1 || true
+            wait "$inhibit_pid" >/dev/null 2>&1 || true
+          fi
+        }
+
+        trap cleanup EXIT INT TERM
+
+        policy_cookie="$(
+          ${pkgs.systemd}/bin/busctl --user call org.kde.Solid.PowerManagement \
+            /org/kde/Solid/PowerManagement/PolicyAgent \
+            org.kde.Solid.PowerManagement.PolicyAgent \
+            AddInhibition uss 5 keep-awake "Prevent sleep, lock, and dimming" 2>/dev/null \
+            | ${pkgs.gnused}/bin/sed -n 's/^u \([0-9]\+\).*/\1/p'
+        )"
+
+        screensaver_cookie="$(
+          ${pkgs.glib}/bin/gdbus call --session \
+            --dest org.freedesktop.ScreenSaver \
+            --object-path /ScreenSaver \
+            --method org.freedesktop.ScreenSaver.Inhibit \
+            keep-awake "Prevent sleep, lock, and dimming" 2>/dev/null \
+            | ${pkgs.gnused}/bin/sed -n 's/.*uint32 \([0-9]\+\).*/\1/p'
+        )"
+
+        ${pkgs.systemd}/bin/systemd-inhibit \
+          --what=sleep:idle:handle-lid-switch \
+          --mode=block \
+          --who=keep-awake \
+          --why="Prevent sleep, lock, and dimming" \
+          ${pkgs.coreutils}/bin/sleep infinity &
+        inhibit_pid=$!
+
+        wait "$inhibit_pid"
+      '';
       desktopWallpaper = config.stylix.image;
     in
     {
@@ -179,6 +237,18 @@
           };
 
           Install.WantedBy = [ "graphical-session.target" ];
+        };
+
+        systemd.user.services.keep-awake = {
+          Unit = {
+            Description = "Block sleep, screen lock, and dimming";
+            After = [ "graphical-session.target" "plasma-powerdevil.service" ];
+          };
+
+          Service = {
+            ExecStart = "${keepAwake}";
+            Type = "simple";
+          };
         };
 
         programs.plasma = {

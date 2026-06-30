@@ -8,10 +8,73 @@
       ...
     }:
 
+    let
+      toggleKeepAwake = pkgs.writeShellScript "vicinae-toggle-keep-awake" ''
+        # @vicinae.schemaVersion 1
+        # @vicinae.title Toggle Keep Awake
+        # @vicinae.mode compact
+        # @vicinae.icon ☀️
+        # @vicinae.keywords ["sleep", "awake", "presentation", "inhibit", "power", "lock"]
+        # @vicinae.description Block sleep, screen lock, and dimming until toggled off again
+
+        set -eu
+
+        if ${pkgs.systemd}/bin/systemctl --user is-active --quiet keep-awake.service; then
+          ${pkgs.systemd}/bin/systemctl --user stop keep-awake.service
+          echo "Keep awake disabled"
+        else
+          ${pkgs.systemd}/bin/systemctl --user start keep-awake.service
+          echo "Keep awake enabled"
+        fi
+      '';
+
+      startKeepAwake = pkgs.writeShellScript "vicinae-start-keep-awake" ''
+        # @vicinae.schemaVersion 1
+        # @vicinae.title Start Keep Awake
+        # @vicinae.mode compact
+        # @vicinae.icon ☀️
+        # @vicinae.keywords ["sleep", "awake", "presentation", "inhibit", "power", "lock"]
+        # @vicinae.description Block sleep, screen lock, and dimming
+
+        set -eu
+
+        ${pkgs.systemd}/bin/systemctl --user start keep-awake.service
+        echo "Keep awake enabled"
+      '';
+
+      stopKeepAwake = pkgs.writeShellScript "vicinae-stop-keep-awake" ''
+        # @vicinae.schemaVersion 1
+        # @vicinae.title Stop Keep Awake
+        # @vicinae.mode compact
+        # @vicinae.icon 🌙
+        # @vicinae.keywords ["sleep", "awake", "presentation", "inhibit", "power", "lock"]
+        # @vicinae.description Re-enable normal sleep, lock, and dimming
+
+        set -eu
+
+        ${pkgs.systemd}/bin/systemctl --user stop keep-awake.service
+        echo "Keep awake disabled"
+      '';
+    in
     {
 
       home-manager.users.${username} = {
         home.packages = [ inputs.vicinae ];
+
+        xdg.dataFile = {
+          "vicinae/scripts/toggle-keep-awake" = {
+            source = toggleKeepAwake;
+            executable = true;
+          };
+          "vicinae/scripts/start-keep-awake" = {
+            source = startKeepAwake;
+            executable = true;
+          };
+          "vicinae/scripts/stop-keep-awake" = {
+            source = stopKeepAwake;
+            executable = true;
+          };
+        };
 
         services.vicinae = {
           enable = true;

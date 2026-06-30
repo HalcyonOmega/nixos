@@ -7,7 +7,7 @@
         self.nixosModules.brave
         self.nixosModules.discord
         self.nixosModules.element
-        self.nixosModules.logseq
+        # self.nixosModules.logseq
         self.nixosModules.onlyoffice
         # self.nixosModules.spicetify
         # self.nixosModules.thunderbird

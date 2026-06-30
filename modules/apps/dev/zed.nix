@@ -9,6 +9,8 @@
     }:
     {
       home-manager.users.${username} = {
+        stylix.targets.zed.enable = false;
+
         programs.zed-editor = {
           enable = true;
           package = pkgs.zed-editor;
@@ -27,6 +29,7 @@
             "toml"
           ];
           userSettings = {
+            theme = "Ayu Dark";
             lsp = {
               nixd.binary.path = lib.getExe pkgs.nixd;
               rust-analyzer.binary.path = lib.getExe pkgs.rust-analyzer;
