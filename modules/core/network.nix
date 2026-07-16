@@ -18,7 +18,8 @@
             80
             443
             7878
-            8899 # Tower (new platform preview)
+            8080
+            8899
             53317 # Localsend
           ];
           allowedUDPPorts = [
