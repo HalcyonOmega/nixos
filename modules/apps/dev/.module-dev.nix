@@ -10,6 +10,7 @@
         self.nixosModules.devenv
         self.nixosModules.jetlang
         self.nixosModules.nixd
+        self.nixosModules.node
         # self.nixosModules.odysseus
         self.nixosModules.vscode
         self.nixosModules.zed

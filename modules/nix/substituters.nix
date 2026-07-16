@@ -26,6 +26,9 @@
 
           "https://attic.xuyh0120.win/lantian"
           "https://cache.garnix.io"
+
+          "https://codex-cli.cachix.org"
+          "https://codex-desktop-linux.cachix.org"
         ];
         # ++ lib.optionals cfg.cachyosKernelCache [
 
@@ -44,6 +47,9 @@
 
           "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
           "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+
+          "codex-cli.cachix.org-1:1Br3H1hHoRYG22n//cGKJOk3cQXgYobUel6O8DgSing="
+          "codex-desktop-linux.cachix.org-1:nX/xy6AdK9hQE24A8ALGjkCKj2ObFmcnemiL5Cid4nk="
         ];
         # ++ lib.optionals cfg.cachyosKernelCache [
 

@@ -15,6 +15,7 @@
         self.nixosModules.solaar
         self.nixosModules.streamcontroller
         self.nixosModules.tailscale
+        self.nixosModules.twingate
         self.nixosModules.vicinae
         self.nixosModules.winboat
       ];

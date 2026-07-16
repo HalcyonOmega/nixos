@@ -73,10 +73,17 @@
       inputs.nexpkgs.follows = "nixpkgs";
     };
 
-    jetlang.url = "path:/home/nate/Projects/Github/jet";
+    jetlang.url = "git+file:///home/nate/Projects/Github/jet";
 
     codex-desktop-linux = {
       url = "github:ilysenko/codex-desktop-linux";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    # Codex CLI from OpenAI's official prebuilt release binaries; tracks the
+    # latest release faster than nixpkgs. Bump via `nix flake update codex-cli-nix`.
+    codex-cli-nix = {
+      url = "github:sadjow/codex-cli-nix/main";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
