@@ -11,12 +11,16 @@
       # Codex CLI (0.144.x, GPT-5.6) from OpenAI's official release binaries.
       # Bump via `nix flake update codex-cli-nix`.
       codexCli = inputs.codex-cli-nix.packages.${system}.default;
+      cliproxyapi = inputs.cliproxyapi.packages.${system}.cliproxyapi;
     in
     {
       home-manager.users.${username} = {
         imports = [ inputs.codex-desktop-linux.homeManagerModules.default ];
 
-        home.packages = [ codexCli ];
+        home.packages = [
+          codexCli
+          cliproxyapi
+        ];
 
         # Desktop app (upstream renamed Codex -> ChatGPT; this flake repackages
         # the new ChatGPT.dmg). Bump via `nix flake update codex-desktop-linux`.

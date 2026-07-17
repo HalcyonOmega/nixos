@@ -128,16 +128,36 @@
         ]
       },
       "locked": {
-        "lastModified": 1783474262,
-        "narHash": "sha256-psySCgprSZQ0dnh2lj7QYdCRohbb15uBZY9iMsoziIE=",
+        "lastModified": 1784251880,
+        "narHash": "sha256-Lm9c8DZJHCkd6HcEEOwyh3cooo/hgqWFju1sn+Lq6lo=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "ffae169142dd07e04b61712ad9b509309269399c",
+        "rev": "d316ee38bc9966215bd487f9733ae75d483b6363",
         "type": "github"
       },
       "original": {
         "owner": "sadjow",
         "repo": "claude-code-nix",
+        "type": "github"
+      }
+    },
+    "cliproxyapi": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784232848,
+        "narHash": "sha256-DV284b3UvYrY5REjNlTs7W7gpl+S7ZmvvFwvpLFrT8M=",
+        "owner": "mtul0729",
+        "repo": "cliproxyapi-nix",
+        "rev": "5602ba2cd21d6e8e8a26b8fde290a1d119672fb7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mtul0729",
+        "repo": "cliproxyapi-nix",
         "type": "github"
       }
     },
@@ -149,11 +169,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783639878,
-        "narHash": "sha256-abnrDpUkNg+/xm859m+9BOfjGDPmnAztQvBaR3596Ps=",
+        "lastModified": 1784171300,
+        "narHash": "sha256-LiWzndOW88994z4SCnenv+2rKe/ryEgvWSsBjFpNvrc=",
         "owner": "sadjow",
         "repo": "codex-cli-nix",
-        "rev": "77438a11367ee33190afe5c6cdf22634eced8e77",
+        "rev": "c4b3fc9d761797a813b5f8b1d38a9a81cdba6e45",
         "type": "github"
       },
       "original": {
@@ -171,11 +191,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783646751,
-        "narHash": "sha256-WQ8PoSDD1BLIRX2gx3Cr/aPQgnui8xUm4dgckI97ZHA=",
+        "lastModified": 1784287994,
+        "narHash": "sha256-iliFXF77Cp2g0qMDiken78obkq2afUeKox3dsg6s9oM=",
         "owner": "ilysenko",
         "repo": "codex-desktop-linux",
-        "rev": "c464ae0545388618d0c8f039bbee12d1f4b88008",
+        "rev": "e754f2906d913cf9f15ad842aa92e53d373c3219",
         "type": "github"
       },
       "original": {
@@ -947,11 +967,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1782467914,
-        "narHash": "sha256-pGvFkM8N0xEkIIXDe5YYfbEAvHrk4IxBrjB/x8OomhE=",
+        "lastModified": 1784120854,
+        "narHash": "sha256-KesHgItiZPgGX740axSiQLcIQ8D24MDqNpkKYWIek8k=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e73de5be04e0eff4190a1432b946d469c794e7b4",
+        "rev": "753cc8a3a87467296ddd1fa93f0cc3e81120ee46",
         "type": "github"
       },
       "original": {
@@ -1160,6 +1180,7 @@
       "inputs": {
         "brave-origin": "brave-origin",
         "claude-code-nix": "claude-code-nix",
+        "cliproxyapi": "cliproxyapi",
         "codex-cli-nix": "codex-cli-nix",
         "codex-desktop-linux": "codex-desktop-linux",
         "disko": "disko",

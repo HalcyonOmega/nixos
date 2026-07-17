@@ -87,6 +87,11 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
+    cliproxyapi = {
+      url = "github:mtul0729/cliproxyapi-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

@@ -11,6 +11,7 @@
         ody = "odysseus";
         nit = "nitch";
         code = "codium";
+        cpa = "cli-proxy-api -config ~/.cli-proxy-api/config.yaml";
         nrs = "nh os switch";
         nrb = "nh os build";
         refresh = "nrs";
