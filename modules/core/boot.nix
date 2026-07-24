@@ -70,6 +70,9 @@
             ];
           };
           tmp = {
+            # Keep /tmp on tmpfs. Flipping this off removes tmp.mount and makes
+            # switch-to-configuration stop local-fs / remount /tmp live, which
+            # freezes Plasma sessions. Nix builds go to disk via build-dir.
             useTmpfs = true;
             cleanOnBoot = true;
           };
