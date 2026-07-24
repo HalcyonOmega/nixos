@@ -5,7 +5,9 @@
     {
       nix = {
         settings = {
-          auto-optimise-store = true;
+          # ext4 caps one inode at 65,000 hardlinks. Common tiny files can hit
+          # that ceiling and make every build retry the same failed dedup.
+          auto-optimise-store = false;
           experimental-features = [
             "nix-command"
             "flakes"
