@@ -13,6 +13,8 @@
         code = "codium";
         cpa = "cli-proxy-api -config ~/.cli-proxy-api/config.yaml";
         nrs = "nh os switch";
+        # One-time bootstrap after build-dir moved off /var/tmp (Nix rejects world-writable parents).
+        nrs-bootstrap = "sudo install -d -m 0755 /var/cache/nix-build && nh os switch -- --option build-dir /var/cache/nix-build";
         nrb = "nh os build";
         refresh = "nrs";
         update = "nix flake update";
