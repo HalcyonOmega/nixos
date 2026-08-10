@@ -96,6 +96,12 @@
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+
+    # Oh My Pi (omp) coding agent harness; bump via `nix flake update omp-flake`.
+    omp-flake = {
+      url = "github:cernoh/omp-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   outputs =

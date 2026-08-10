@@ -57,6 +57,7 @@
         self.nixosModules.jetlang
         self.nixosModules.nixd
         self.nixosModules.node
+        self.nixosModules.oh-my-pi
         # self.nixosModules.odysseus
         self.nixosModules.vscode
         self.nixosModules.zed

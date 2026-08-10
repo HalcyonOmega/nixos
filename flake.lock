@@ -1153,6 +1153,26 @@
         "type": "github"
       }
     },
+    "omp-flake": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786056855,
+        "narHash": "sha256-w3v0umnaJStUMwd7H7rCz2ok1PLs7hpW3s+QaG2jn5Q=",
+        "owner": "cernoh",
+        "repo": "omp-flake",
+        "rev": "c25a82acd38bf87c94c40c84de2e586ea5cf2c8e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cernoh",
+        "repo": "omp-flake",
+        "type": "github"
+      }
+    },
     "plasma-manager": {
       "inputs": {
         "home-manager": [
@@ -1200,6 +1220,7 @@
         "nixpkgs-plasma-beta": "nixpkgs-plasma-beta",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur",
+        "omp-flake": "omp-flake",
         "plasma-manager": "plasma-manager",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix",
