@@ -54,7 +54,7 @@
                 publisher = "openai";
                 name = "chatgpt";
                 version = "26.5707.31428";
-                sha256 = "sha256-CFgMcUG/gczHZXn/vy1CD2ihwUxS66Cu3YSZsTJ0SkA=";
+                sha256 = "sha256-tPRK+pFkMzQpPb+ok79SS94e77V08J1GSRMMhDsD1pk=";
               }
             ];
         };

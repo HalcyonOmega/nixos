@@ -45,10 +45,6 @@
             exec ${claude}/bin/claude --model "${model}" "$@"
           '';
         };
-      claudeKimi = mkClaudeGateway {
-        name = "claude-kimi";
-        model = "kimi-k3";
-      };
       claudeSol = mkClaudeGateway {
         name = "claude-sol";
         model = "gpt-5.6-sol";
@@ -59,7 +55,6 @@
         # sadjow/claude-code-nix tracks upstream hourly; bump via `nix flake update claude-code-nix`.
         home.packages = [
           claude
-          claudeKimi
           claudeSol
         ];
       };

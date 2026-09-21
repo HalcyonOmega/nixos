@@ -5,6 +5,9 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    # Keep Handy current without upgrading the other unstable applications.
+    nixpkgs-handy.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     # Plasma 6.7+ lands on master before nixos-unstable. Use only via
     # halcyon-plasma-beta until it reaches the stable channel inputs.
     nixpkgs-plasma-beta.url = "github:NixOS/nixpkgs/master";
@@ -84,11 +87,6 @@
     # latest release faster than nixpkgs. Bump via `nix flake update codex-cli-nix`.
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix/main";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-
-    cliproxyapi = {
-      url = "github:mtul0729/cliproxyapi-nix";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 

@@ -8,7 +8,6 @@
       ...
     }:
     let
-      jetRoot = "/home/${username}/Projects/Github/jet";
       jetVscodeExtension = pkgs.vscode-utils.buildVscodeExtension {
         pname = "jet-lang-jet";
         version = "0.1.0";
@@ -46,7 +45,9 @@
         programs.cursor = {
           enable = true;
           package = pkgs.code-cursor;
-          mutableExtensionsDir = false;
+          # Jet's editors/vscode/install.sh must be able to replace the bundled
+          # jet-lang.jet grammar without a NixOS rebuild on every syntax tweak.
+          mutableExtensionsDir = true;
           profiles.default = {
             enableUpdateCheck = false;
             enableExtensionUpdateCheck = false;

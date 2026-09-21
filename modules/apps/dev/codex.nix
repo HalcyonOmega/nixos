@@ -12,7 +12,6 @@
       # Codex CLI (0.144.x, GPT-5.6) from OpenAI's official release binaries.
       # Bump via `nix flake update codex-cli-nix`.
       codexCli = inputs.codex-cli-nix.packages.${system}.default;
-      cliproxyapi = inputs.cliproxyapi.packages.${system}.cliproxyapi;
       # Remote mobile control only — no Computer Use / AT-SPI.
       codexDesktop =
         inputs.codex-desktop-linux.packages.${system}.codex-desktop-remote-mobile-control;
@@ -39,7 +38,6 @@
 
         home.packages = [
           codexCli
-          cliproxyapi
         ];
 
         # User-local desktop entries override the system profile immediately;

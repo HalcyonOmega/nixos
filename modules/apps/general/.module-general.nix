@@ -7,6 +7,7 @@
         self.nixosModules.brave
         self.nixosModules.discord
         self.nixosModules.element
+        self.nixosModules.handy
         # self.nixosModules.logseq
         self.nixosModules.onlyoffice
         # self.nixosModules.spicetify
