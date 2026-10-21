@@ -9,7 +9,7 @@
       ...
     }:
     let
-      # Codex CLI (0.144.x, GPT-5.6) from OpenAI's official release binaries.
+      # Codex CLI (0.159.0, GPT-5.6) from OpenAI's official release binaries.
       # Bump via `nix flake update codex-cli-nix`.
       codexCli = inputs.codex-cli-nix.packages.${system}.default;
       # Remote mobile control only — no Computer Use / AT-SPI.

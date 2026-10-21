@@ -5,6 +5,8 @@ import { Container, type SettingItem, SettingsList, Text } from "@oh-my-pi/pi-tu
 const TOOLBOX_NAME = "toolbox";
 const CORE_TOOLS = ["read", "bash", "edit", "write", "grep", "glob", TOOLBOX_NAME] as const;
 const CORE_TOOL_SET = new Set<string>(CORE_TOOLS);
+// Active by default when registered (ask needs an interactive UI), but not required or locked.
+const DEFAULT_TOOLS = [...CORE_TOOLS, "ask"] as const;
 const STATE_TYPE = "pip-tool-selection";
 
 interface ToolSelectionState {
@@ -76,7 +78,7 @@ export default function pipToolbox(pi: ExtensionAPI) {
 	}
 
 	async function restoreSelection(ctx: ExtensionContext) {
-		await applySelection(savedSelection(ctx) ?? CORE_TOOLS, false);
+		await applySelection(savedSelection(ctx) ?? DEFAULT_TOOLS, false);
 	}
 
 	function statusText(selected: Iterable<string>): string {
@@ -145,6 +147,7 @@ export default function pipToolbox(pi: ExtensionAPI) {
 				for (const name of requested) current.add(name);
 			} else if (params.action === "reset") {
 				current.clear();
+				for (const name of DEFAULT_TOOLS) current.add(name);
 			}
 
 			const selected = await applySelection(current, true);
@@ -207,7 +210,7 @@ export default function pipToolbox(pi: ExtensionAPI) {
 	pi.registerCommand("tools-core", {
 		description: "Reset Pip to its lean core tools",
 		handler: async (_args, ctx) => {
-			const selected = await applySelection(CORE_TOOLS, true);
+			const selected = await applySelection(DEFAULT_TOOLS, true);
 			ctx.ui.notify(`Pip tools reset: ${selected.join(", ")}`, "info");
 		},
 	});

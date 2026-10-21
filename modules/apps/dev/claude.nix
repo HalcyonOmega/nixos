@@ -47,7 +47,7 @@
         };
       claudeSol = mkClaudeGateway {
         name = "claude-sol";
-        model = "gpt-5.6-sol";
+        model = "gpt-6-sol";
       };
     in
     {

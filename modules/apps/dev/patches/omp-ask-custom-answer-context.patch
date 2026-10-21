@@ -1,8 +1,8 @@
 diff --git a/packages/coding-agent/src/modes/controllers/extension-ui-controller.ts b/packages/coding-agent/src/modes/controllers/extension-ui-controller.ts
-index 533abf8..4f753a2 100644
+index 39fa7db..63e56a3 100644
 --- a/packages/coding-agent/src/modes/controllers/extension-ui-controller.ts
 +++ b/packages/coding-agent/src/modes/controllers/extension-ui-controller.ts
-@@ -700,8 +700,17 @@ export class ExtensionUiController {
+@@ -785,8 +785,17 @@ export class ExtensionUiController {
  					prompt.title,
  					prefill,
  					(text, images) => finishPrompt({ text, images }),
@@ -23,7 +23,7 @@ index 533abf8..4f753a2 100644
  				this.ctx.editorContainer.clear();
  				this.ctx.editorContainer.addChild(promptEditor);
 diff --git a/packages/tui/src/overlays/ask-dialog.ts b/packages/tui/src/overlays/ask-dialog.ts
-index cc0b3b6..96a433e 100644
+index 4d8e80d..99d56d1 100644
 --- a/packages/tui/src/overlays/ask-dialog.ts
 +++ b/packages/tui/src/overlays/ask-dialog.ts
 @@ -132,6 +132,10 @@ export interface AskDialogPrompt {
@@ -46,7 +46,7 @@ index cc0b3b6..96a433e 100644
  	note: string | undefined;
  	noteImages: ImageContent[] | undefined;
  	noteRowKey: string | undefined;
-@@ -574,6 +580,7 @@ export class AskDialogComponent implements Component {
+@@ -604,6 +610,7 @@ export class AskDialogComponent implements Component {
  				selectedOptions: new Set<string>(),
  				customInput: undefined,
  				customInputImages: undefined,
@@ -54,7 +54,7 @@ index cc0b3b6..96a433e 100644
  				note: undefined,
  				noteImages: undefined,
  				noteRowKey: undefined,
-@@ -1299,10 +1306,26 @@ export class AskDialogComponent implements Component {
+@@ -1436,10 +1443,26 @@ export class AskDialogComponent implements Component {
  	): Promise<void> {
  		this.#promptActive = true;
  		try {
@@ -84,7 +84,7 @@ index cc0b3b6..96a433e 100644
  			if (input.text.trim() === "") {
  				// Submitting an empty value unselects the custom answer.
 diff --git a/packages/tui/src/overlays/hook-editor.ts b/packages/tui/src/overlays/hook-editor.ts
-index 3884600..ae3cd6a 100644
+index fc6b9f9..c94dfed 100644
 --- a/packages/tui/src/overlays/hook-editor.ts
 +++ b/packages/tui/src/overlays/hook-editor.ts
 @@ -11,6 +11,7 @@ import type { ImageContent } from "@oh-my-pi/pi-ai";
@@ -95,7 +95,7 @@ index 3884600..ae3cd6a 100644
  	Editor,
  	Ellipsis,
  	type Focusable,
-@@ -56,6 +57,48 @@ export function boundPromptTitle(prefix: string, question: string): string {
+@@ -65,6 +66,48 @@ export function boundPromptTitle(prefix: string, question: string): string {
  	return [...kept, last].join("\n");
  }
  
@@ -144,7 +144,7 @@ index 3884600..ae3cd6a 100644
  export interface HookEditorOptions {
  	/** Edit text with the host's configured external editor. */
  	externalEditor?: (text: string) => Promise<string | null>;
-@@ -67,6 +110,12 @@ export interface HookEditorOptions {
+@@ -76,6 +119,12 @@ export interface HookEditorOptions {
  	 * as markdown, under the title.
  	 */
  	question?: string;
@@ -157,7 +157,7 @@ index 3884600..ae3cd6a 100644
  	/** Allow clipboard images to be attached to this prompt. */
  	acceptImages?: boolean;
  	/** Images already represented by markers in the prefilled text. */
-@@ -97,7 +146,7 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+@@ -106,7 +155,7 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
  	#editor: Editor;
  	#field: FormField;
  	#onSubmitCallback: (value: string, images?: ImageContent[]) => void;
@@ -166,7 +166,7 @@ index 3884600..ae3cd6a 100644
  	#tui: TUI;
  	#promptStyle: boolean;
  	#acceptImages: boolean;
-@@ -119,15 +168,20 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+@@ -128,15 +177,20 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
  		title: string,
  		prefill: string | undefined,
  		onSubmit: (value: string, images?: ImageContent[]) => void,
@@ -187,10 +187,10 @@ index 3884600..ae3cd6a 100644
  		const [titleLine = "", ...detailLines] = terminalTitle.split("\n");
 +		const contextChildren =
 +			question !== undefined && choices !== undefined ? promptContextChildren(question, choices) : undefined;
- 		super(titleLine, "omp.overlay.hook-editor");
+ 		super(titleLine, ROLE);
  
  		this.#tui = tui;
-@@ -152,7 +206,12 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+@@ -161,7 +215,12 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
  		// Bound the editor so long content scrolls instead of pushing the
  		// submit hint off-screen. Caller may override via options.maxHeight.
  		const termRows = this.#tui.terminal?.rows ?? process.stdout.rows ?? 40;
@@ -204,7 +204,7 @@ index 3884600..ae3cd6a 100644
  		this.#editor.setScrollbarVisible(true);
  		if (prefill) {
  			this.#editor.setText(prefill);
-@@ -166,8 +225,9 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+@@ -175,8 +234,9 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
  			: `${formatKeyHints(followUpKeys)} submit  ${interruptKey()} cancel  ${externalEditorKey} external editor`;
  		this.#field = new FormField(this.#editor, {
  			theme: formTheme,
@@ -216,8 +216,8 @@ index 3884600..ae3cd6a 100644
  					? [new Spacer(1), ...detailLines.map(line => new Text(theme.fg("accent", line), 0, 0))]
  					: undefined,
  			hint,
-@@ -195,7 +255,13 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
- 			nativeChildren.push(
+@@ -204,7 +264,13 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+ 			head.push(
  				node(
  					"md",
 -					{ text: replaceTabs(sanitizeCarriageReturns(question)), role: "omp.ask.question" },
@@ -231,7 +231,7 @@ index 3884600..ae3cd6a 100644
  					undefined,
  					"question",
  				),
-@@ -270,24 +336,23 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+@@ -328,24 +394,23 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
  			this.#submitQueued = true;
  			return;
  		}
@@ -267,7 +267,7 @@ index 3884600..ae3cd6a 100644
  	/** Whether this prompt opted into clipboard image attachments. */
  	get acceptsImages(): boolean {
  		return this.#acceptImages && !this.#disposed;
-@@ -335,8 +400,9 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+@@ -393,8 +458,9 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
  	}
  
  	#cancel(): void {

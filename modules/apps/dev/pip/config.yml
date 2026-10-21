@@ -1,6 +1,11 @@
 modelRoles:
-  default: openai-codex/gpt-5.6-luna:max
-  smol: openai-codex/gpt-5.6-luna:max
+  default: openai-codex/gpt-6-luna:max
+  smol: openai-codex/gpt-6-luna:max
+  task: anthropic/claude-opus-5-5:high
+
+task:
+  agentModelOverrides:
+    task: "@task"
 
 personality: none
 includeModelInPrompt: false
@@ -23,7 +28,7 @@ edit:
   mode: hashline
 
 ask:
-  enabled: false
+  enabled: true
 
 lsp:
   enabled: true
@@ -46,5 +51,18 @@ ttsr:
 retry:
   modelFallback: false
 
+# Compact Opus 5.5 at a fixed 200k tokens instead of near its 1M window. Each
+# turn re-reads the whole cached context, so long-running subagents at 300-500k
+# were most of the Claude quota burn; this caps the per-turn context cost.
+compaction:
+  modelThresholds:
+    anthropic/claude-opus-5-5: f200000
+
 dev:
   autoqa: false
+
+# /collab browser links default to the hosted client (my.omp.sh), which works
+# from any device and the QR code. To make them open the patched client served
+# on this machine by the omp-collab-web user service instead, uncomment:
+# collab:
+#   webUrl: http://localhost:7468
