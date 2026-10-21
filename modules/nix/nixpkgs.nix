@@ -13,7 +13,7 @@
             inputs.nix-vscode-extensions.overlays.default
           ];
           config.permittedInsecurePackages = [
-            "electron-39.8.10"
+            "electron-40.10.5"
           ];
         };
       };

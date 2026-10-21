@@ -1,0 +1,791 @@
+diff --git a/packages/collab-web/src/app.tsx b/packages/collab-web/src/app.tsx
+index a662508..7cc1e65 100644
+--- a/packages/collab-web/src/app.tsx
++++ b/packages/collab-web/src/app.tsx
+@@ -126,6 +126,12 @@ function Session({ client, onLeave, onRejoin }: SessionProps): ReactNode {
+ 	const autoOpenedRef = useRef(false);
+ 
+ 	const subCount = useMemo(() => snap.agents.filter(a => a.kind === "sub").length, [snap.agents]);
++	// Header badge: what is working now, not every agent the session ever ran.
++	const activeSubCount = useMemo(
++		() => snap.agents.filter(a => a.kind === "sub" && (a.status === "running" || a.status === "idle")).length,
++		[snap.agents],
++	);
++	const retry = useCallback(() => client.retryNow(), [client]);
+ 
+ 	// Task-card agent chips drill into the same drawer the rail uses.
+ 	const agentIds = useMemo(() => new Set(snap.agents.map(a => a.id)), [snap.agents]);
+@@ -164,7 +170,7 @@ function Session({ client, onLeave, onRejoin }: SessionProps): ReactNode {
+ 				state={snap.state}
+ 				phase={snap.phase}
+ 				readOnly={snap.readOnly}
+-				subCount={subCount}
++				subCount={activeSubCount}
+ 				railOpen={railOpen}
+ 				onToggleRail={toggleRail}
+ 				onLeave={onLeave}
+@@ -226,6 +232,7 @@ function Session({ client, onLeave, onRejoin }: SessionProps): ReactNode {
+ 				loading={snap.loading}
+ 				onRejoin={onRejoin}
+ 				onNewLink={onLeave}
++				onRetry={retry}
+ 			/>
+ 			<Toasts notices={snap.notices} />
+ 		</div>
+diff --git a/packages/collab-web/src/components/agents/AgentsPanel.tsx b/packages/collab-web/src/components/agents/AgentsPanel.tsx
+index f92b551..d86e84d 100644
+--- a/packages/collab-web/src/components/agents/AgentsPanel.tsx
++++ b/packages/collab-web/src/components/agents/AgentsPanel.tsx
+@@ -78,6 +78,14 @@ const AgentRow = memo(function AgentRow(props: {
+ 	);
+ });
+ 
++/** Finished subagents shown before "show more"; hosts may still mirror thousands. */
++const RECENT_PREVIEW = 8;
++const RECENT_PAGE = 50;
++
++function isLive(agent: AgentSnapshot): boolean {
++	return agent.status === "running" || agent.status === "idle";
++}
++
+ /** Memoized: the client replaces `progress`/`lifecycle` only when they change. */
+ export const AgentsPanel = memo(function AgentsPanel(props: {
+ 	agents: readonly AgentSnapshot[];
+@@ -88,50 +96,83 @@ export const AgentsPanel = memo(function AgentsPanel(props: {
+ }): ReactNode {
+ 	const { agents, progress, lifecycle, selectedId, onSelect } = props;
+ 	const now = useNow(1000);
++	const [recentShown, setRecentShown] = useState(RECENT_PREVIEW);
+ 
+ 	const sorted = useMemo(() => {
+ 		const mains: AgentSnapshot[] = [];
+-		const subs: AgentSnapshot[] = [];
+-		for (const agent of agents) (agent.kind === "main" ? mains : subs).push(agent);
+-		subs.sort((a, b) => {
++		const active: AgentSnapshot[] = [];
++		const recent: AgentSnapshot[] = [];
++		for (const agent of agents) {
++			if (agent.kind === "main") mains.push(agent);
++			else if (isLive(agent)) active.push(agent);
++			else recent.push(agent);
++		}
++		active.sort((a, b) => {
+ 			const ar = a.status === "running" ? 0 : 1;
+ 			const br = b.status === "running" ? 0 : 1;
+ 			if (ar !== br) return ar - br;
+ 			return b.lastActivity - a.lastActivity;
+ 		});
+-		return { mains, subs };
++		recent.sort((a, b) => b.lastActivity - a.lastActivity);
++		return { mains, active, recent };
+ 	}, [agents]);
+ 
++	// Keep a selected finished agent visible even when it is past the preview.
++	const selectedIndex = selectedId === null ? -1 : sorted.recent.findIndex(agent => agent.id === selectedId);
++	const recentLimit = Math.max(recentShown, selectedIndex + 1);
++	const recentVisible = sorted.recent.slice(0, recentLimit);
++	const recentHidden = sorted.recent.length - recentVisible.length;
++
++	const row = (agent: AgentSnapshot): ReactNode => (
++		<AgentRow
++			key={agent.id}
++			agent={agent}
++			payload={progress.get(agent.id)}
++			lifecycle={lifecycle.get(agent.id)}
++			selected={selectedId === agent.id}
++			now={now}
++			onSelect={onSelect}
++		/>
++	);
++
+ 	return (
+ 		<div className="ag-panel">
+ 			<div className="ag-heading">Session</div>
+-			{sorted.mains.map(agent => (
+-				<AgentRow
+-					key={agent.id}
+-					agent={agent}
+-					payload={progress.get(agent.id)}
+-					lifecycle={lifecycle.get(agent.id)}
+-					selected={selectedId === agent.id}
+-					now={now}
+-					onSelect={onSelect}
+-				/>
+-			))}
++			{sorted.mains.map(row)}
+ 			<div className="ag-heading">
+-				Subagents
+-				{sorted.subs.length > 0 && <span className="ag-heading-count">{sorted.subs.length}</span>}
++				Active
++				{sorted.active.length > 0 && (
++					<span className="ag-heading-count ag-heading-count--live">{sorted.active.length}</span>
++				)}
+ 			</div>
+-			{sorted.subs.map(agent => (
+-				<AgentRow
+-					key={agent.id}
+-					agent={agent}
+-					payload={progress.get(agent.id)}
+-					lifecycle={lifecycle.get(agent.id)}
+-					selected={selectedId === agent.id}
+-					now={now}
+-					onSelect={onSelect}
+-				/>
+-			))}
+-			{sorted.subs.length === 0 ? <div className="ag-empty">No subagents yet</div> : null}
++			{sorted.active.map(row)}
++			{sorted.active.length === 0 ? (
++				<div className="ag-empty">{sorted.recent.length > 0 ? "No subagents running" : "No subagents yet"}</div>
++			) : null}
++			{sorted.recent.length > 0 && (
++				<>
++					<div className="ag-heading">
++						Recent
++						<span className="ag-heading-count">{sorted.recent.length}</span>
++						{recentShown > RECENT_PREVIEW && (
++							<button type="button" className="ag-heading-action" onClick={() => setRecentShown(RECENT_PREVIEW)}>
++								collapse
++							</button>
++						)}
++					</div>
++					{recentVisible.map(row)}
++					{recentHidden > 0 && (
++						<button
++							type="button"
++							className="ag-more"
++							onClick={() => setRecentShown(shown => shown + RECENT_PAGE)}
++						>
++							show {Math.min(RECENT_PAGE, recentHidden).toLocaleString("en-US")} more
++							{recentHidden > RECENT_PAGE ? ` of ${recentHidden.toLocaleString("en-US")}` : ""}
++						</button>
++					)}
++				</>
++			)}
+ 		</div>
+ 	);
+ });
+diff --git a/packages/collab-web/src/components/agents/agents.css b/packages/collab-web/src/components/agents/agents.css
+index 105e9fd..2ee0883 100644
+--- a/packages/collab-web/src/components/agents/agents.css
++++ b/packages/collab-web/src/components/agents/agents.css
+@@ -37,6 +37,44 @@
+ 	line-height: 16px;
+ }
+ 
++.ag-heading-count--live {
++	color: var(--ok);
++	border-color: color-mix(in srgb, var(--ok) 40%, var(--border));
++	background: color-mix(in srgb, var(--ok) 10%, var(--bg-raised));
++}
++
++.ag-heading-action {
++	margin-left: auto;
++	padding: 0;
++	font: inherit;
++	font-size: 11px;
++	color: var(--fg-faint);
++	background: none;
++	border: 0;
++	cursor: pointer;
++}
++
++.ag-heading-action:hover {
++	color: var(--fg-muted);
++}
++
++.ag-more {
++	margin: 4px 6px 2px;
++	height: 28px;
++	font: inherit;
++	font-size: 12px;
++	color: var(--fg-faint);
++	background: transparent;
++	border: 1px dashed var(--border);
++	border-radius: 8px;
++	cursor: pointer;
++}
++
++.ag-more:hover {
++	color: var(--fg-muted);
++	border-color: var(--border-strong);
++}
++
+ .ag-row {
+ 	display: flex;
+ 	flex-direction: column;
+diff --git a/packages/collab-web/src/components/shell/Banners.tsx b/packages/collab-web/src/components/shell/Banners.tsx
+index 8ac4ee1..22a9962 100644
+--- a/packages/collab-web/src/components/shell/Banners.tsx
++++ b/packages/collab-web/src/components/shell/Banners.tsx
+@@ -7,15 +7,28 @@ export interface BannersProps {
+ 	loading: GuestSnapshot["loading"];
+ 	onRejoin(): void;
+ 	onNewLink(): void;
++	/** Skip the reconnect backoff; omitted hides the action. */
++	onRetry?(): void;
+ }
+ 
+-export function Banners({ phase, endedReason, loading, onRejoin, onNewLink }: BannersProps): ReactNode {
++function LoadBar({ loading }: { loading: GuestSnapshot["loading"] }): ReactNode {
++	if (!loading || loading.total <= 0) return null;
++	const pct = Math.min(100, Math.floor((loading.received / loading.total) * 100));
++	return (
++		<span className="sh-banner-bar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
++			<span className="sh-banner-bar-fill" style={{ width: `${pct}%` }} />
++		</span>
++	);
++}
++
++export function Banners({ phase, endedReason, loading, onRejoin, onNewLink, onRetry }: BannersProps): ReactNode {
+ 	const progress = loading && loading.total > 0 ? ` ${Math.floor((loading.received / loading.total) * 100)}%` : "";
+ 	if (phase === "connecting" || phase === "waiting") {
+ 		return (
+ 			<div className="sh-banner" role="status">
+ 				<span className="sh-banner-dot" />
+ 				{phase === "connecting" ? "Connecting to relay…" : `Joining session…${progress}`}
++				<LoadBar loading={loading} />
+ 			</div>
+ 		);
+ 	}
+@@ -23,7 +36,13 @@ export function Banners({ phase, endedReason, loading, onRejoin, onNewLink }: Ba
+ 		return (
+ 			<div className="sh-banner" role="status">
+ 				<span className="sh-banner-dot" />
+-				{`Reconnecting…${progress}`}
++				{loading ? `Syncing latest history…${progress}` : "Reconnecting…"}
++				<LoadBar loading={loading} />
++				{!loading && onRetry && (
++					<button type="button" className="sh-banner-action" onClick={onRetry}>
++						Retry now
++					</button>
++				)}
+ 			</div>
+ 		);
+ 	}
+diff --git a/packages/collab-web/src/components/shell/shell.css b/packages/collab-web/src/components/shell/shell.css
+index 3de9d54..e0ec105 100644
+--- a/packages/collab-web/src/components/shell/shell.css
++++ b/packages/collab-web/src/components/shell/shell.css
+@@ -582,6 +582,39 @@
+ 	animation: pulse 1.2s ease-in-out infinite;
+ }
+ 
++.sh-banner-bar {
++	position: relative;
++	width: 72px;
++	height: 4px;
++	overflow: hidden;
++	border-radius: 999px;
++	background: var(--bg-raised);
++}
++
++.sh-banner-bar-fill {
++	position: absolute;
++	inset: 0 auto 0 0;
++	border-radius: inherit;
++	background: var(--fg-muted);
++	transition: width 240ms var(--ease-out);
++}
++
++.sh-banner-action {
++	margin-left: 2px;
++	padding: 2px 9px;
++	font: inherit;
++	font-size: 11.5px;
++	color: var(--fg);
++	background: var(--bg-raised);
++	border: 1px solid var(--border-strong);
++	border-radius: 999px;
++	cursor: pointer;
++}
++
++.sh-banner-action:hover {
++	background: color-mix(in srgb, var(--fg) 10%, var(--bg-raised));
++}
++
+ .sh-ended {
+ 	position: fixed;
+ 	inset: 0;
+diff --git a/packages/collab-web/src/components/transcript/Transcript.tsx b/packages/collab-web/src/components/transcript/Transcript.tsx
+index e92bcd9..83b417c 100644
+--- a/packages/collab-web/src/components/transcript/Transcript.tsx
++++ b/packages/collab-web/src/components/transcript/Transcript.tsx
+@@ -221,6 +221,15 @@ const EntryRow = memo(function EntryRow({ entry, results, active, host }: EntryR
+ 					</Row>
+ 				);
+ 			}
++			if (entry.customType === "collab-history-omitted") {
++				// Host-side marker: older history stays on the host to keep joins fast.
++				const text = typeof entry.content === "string" ? entry.content : "earlier history not loaded";
++				return (
++					<div className="tr-divider tr-divider--history" title={text}>
++						<span>{text.replace(/^…/, "").replace(/\s+—.*$/, "")}</span>
++					</div>
++				);
++			}
+ 			if (!entry.display) return null;
+ 			return (
+ 				<Row kind="custom" gutter="" title={entry.timestamp}>
+diff --git a/packages/collab-web/src/components/transcript/transcript.css b/packages/collab-web/src/components/transcript/transcript.css
+index 219ff3a..7c326ca 100644
+--- a/packages/collab-web/src/components/transcript/transcript.css
++++ b/packages/collab-web/src/components/transcript/transcript.css
+@@ -210,6 +210,15 @@
+ 	background: var(--border);
+ }
+ 
++.tr-divider--history {
++	margin: 6px 0 20px;
++}
++
++.tr-divider--history::before,
++.tr-divider--history::after {
++	background: repeating-linear-gradient(90deg, var(--border) 0 6px, transparent 6px 10px);
++}
++
+ .tr-marker {
+ 	color: var(--fg-faint);
+ 	font-family: var(--font-mono);
+diff --git a/packages/collab-web/src/lib/client.ts b/packages/collab-web/src/lib/client.ts
+index 7e1c538..1e098d6 100644
+--- a/packages/collab-web/src/lib/client.ts
++++ b/packages/collab-web/src/lib/client.ts
+@@ -80,6 +80,12 @@ const TRANSCRIPT_TIMEOUT_MS = 10_000;
+ const WELCOME_TIMEOUT_MS = 30_000;
+ /** Mirrors the TUI guest's SNAPSHOT_PROGRESS_TIMEOUT_MS: every snapshot chunk must make progress. */
+ const SNAPSHOT_PROGRESS_TIMEOUT_MS = 30_000;
++/**
++ * A stalled snapshot redials (the next welcome restarts it) this many times
++ * before the join is given up; a relay hiccup mid-download should not end the
++ * session outright.
++ */
++const MAX_SNAPSHOT_STALL_RETRIES = 2;
+ /** Commit delay when `requestAnimationFrame` is unavailable (tests, non-DOM hosts). */
+ const FRAME_FALLBACK_MS = 16;
+ 
+@@ -127,6 +133,9 @@ export class GuestClient {
+ 	#welcomed = false;
+ 	#welcomeTimer: Timer | null = null;
+ 	#snapshotProgressTimer: Timer | null = null;
++	#snapshotStalls = 0;
++	/** Removes the page visibility/network listeners installed by connect(). */
++	#detachWakeListeners: (() => void) | null = null;
+ 
+ 	#phase: ConnectionPhase = "connecting";
+ 	#endedReason: string | null = null;
+@@ -186,6 +195,7 @@ export class GuestClient {
+ 			this.#endedReason = null;
+ 			this.#commit();
+ 		}
++		this.#attachWakeListeners();
+ 		this.#socket.connect();
+ 		if (!this.#welcomed && this.#welcomeTimer === null) {
+ 			this.#welcomeTimer = setTimeout(() => {
+@@ -198,9 +208,40 @@ export class GuestClient {
+ 	close(): void {
+ 		this.#clearWelcomeTimer();
+ 		this.#clearSnapshotProgressTimer();
++		this.#detachWakeListeners?.();
++		this.#detachWakeListeners = null;
+ 		this.#socket.close();
+ 	}
+ 
++	/** Skip the reconnect backoff (banner "Retry now"). */
++	retryNow(): void {
++		if (this.#phase === "ended") return;
++		this.#socket.reconnectNow();
++	}
++
++	/**
++	 * Phones and laptops suspend background tabs and drop their sockets without
++	 * telling the page. Coming back (tab visible, network online, bfcache
++	 * restore) checks the connection at once instead of waiting out a backoff
++	 * or the OS-level TCP timeout.
++	 */
++	#attachWakeListeners(): void {
++		if (this.#detachWakeListeners !== null || typeof window === "undefined") return;
++		const wake = (): void => {
++			if (this.#phase === "ended") return;
++			if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
++			this.#socket.wake();
++		};
++		window.addEventListener("online", wake);
++		window.addEventListener("pageshow", wake);
++		if (typeof document !== "undefined") document.addEventListener("visibilitychange", wake);
++		this.#detachWakeListeners = () => {
++			window.removeEventListener("online", wake);
++			window.removeEventListener("pageshow", wake);
++			if (typeof document !== "undefined") document.removeEventListener("visibilitychange", wake);
++		};
++	}
++
+ 	subscribe(listener: () => void): () => void {
+ 		this.#listeners.add(listener);
+ 		return () => {
+@@ -284,6 +325,8 @@ export class GuestClient {
+ 		if (this.#phase === "ended") return;
+ 		this.#clearWelcomeTimer();
+ 		this.#clearSnapshotProgressTimer();
++		this.#detachWakeListeners?.();
++		this.#detachWakeListeners = null;
+ 		this.#phase = "ended";
+ 		this.#endedReason = reason;
+ 		this.#pendingSnapshot = null;
+@@ -308,7 +351,17 @@ export class GuestClient {
+ 		this.#clearSnapshotProgressTimer();
+ 		this.#snapshotProgressTimer = setTimeout(() => {
+ 			this.#snapshotProgressTimer = null;
+-			this.#end("timed out waiting for the host's session snapshot");
++			if (this.#snapshotStalls >= MAX_SNAPSHOT_STALL_RETRIES) {
++				this.#end("timed out waiting for the host's session snapshot");
++				return;
++			}
++			// Redial: the host answers the new hello with a fresh welcome and
++			// snapshot, and entries already on screen stay until it lands.
++			this.#snapshotStalls++;
++			this.#pendingSnapshot = null;
++			this.#phase = "reconnecting";
++			this.#commit();
++			this.#socket.reconnectNow();
+ 		}, SNAPSHOT_PROGRESS_TIMEOUT_MS);
+ 	}
+ 
+@@ -364,6 +417,7 @@ export class GuestClient {
+ 				if (frame.entryCount === 0) {
+ 					this.#clearSnapshotProgressTimer();
+ 					this.#phase = "live";
++					this.#snapshotStalls = 0;
+ 				} else {
+ 					this.#armSnapshotProgressTimer();
+ 				}
+@@ -389,6 +443,7 @@ export class GuestClient {
+ 				this.#pendingSnapshot = null;
+ 				this.#clearSnapshotProgressTimer();
+ 				this.#phase = "live";
++				this.#snapshotStalls = 0;
+ 				break;
+ 			}
+ 			case "entry":
+diff --git a/packages/collab-web/src/lib/socket.ts b/packages/collab-web/src/lib/socket.ts
+index 5b9482f..f5af5c4 100644
+--- a/packages/collab-web/src/lib/socket.ts
++++ b/packages/collab-web/src/lib/socket.ts
+@@ -18,9 +18,29 @@ const RELAY_CLOSE_REASONS: Record<number, string> = {
+ };
+ 
+ const BACKOFF_BASE_MS = 1_000;
+-const BACKOFF_MAX_MS = 30_000;
++/**
++ * Guests cap retries at 10 s (the TUI host waits up to 30 s): a browser tab is
++ * usually someone actively watching, and every reconnect only costs a small
++ * history tail, so getting back quickly matters more than sparing the relay.
++ */
++const BACKOFF_MAX_MS = 10_000;
+ /** Max enveloped frames buffered while a reconnect is pending; overflow is dropped. */
+ const MAX_PENDING_SENDS = 256;
++/**
++ * Browsers cannot send WebSocket pings, so a socket whose network silently
++ * died (phone locked, Wi-Fi handover, laptop lid) keeps reading as open until
++ * the OS gives up — often minutes. After this much silence the guest asks the
++ * host for something it always answers: a transcript read for agent `""`,
++ * which the host rejects with a targeted `transcript` reply.
++ */
++export const LIVENESS_PROBE_AFTER_MS = 20_000;
++/** No frame at all this long after a probe means the connection is dead; reconnect. */
++export const LIVENESS_PROBE_TIMEOUT_MS = 25_000;
++/** Shorter probe deadline when the tab regains focus or the network comes back. */
++export const LIVENESS_WAKE_TIMEOUT_MS = 6_000;
++const LIVENESS_TICK_MS = 5_000;
++/** `reqId` of liveness probes; the guest's own transcript reads start at 1. */
++export const LIVENESS_PROBE_REQ_ID = 0;
+ 
+ export interface CollabSocketOptions {
+ 	/** wss://host[:port]/r/<roomId> — no query string. */
+@@ -52,6 +72,13 @@ export class CollabSocket {
+ 	#recvChain: Promise<void> = Promise.resolve();
+ 	/** Envelopes sealed while disconnected, flushed on the next open. */
+ 	#pendingSends: Uint8Array<ArrayBuffer>[] = [];
++	/** When the current socket last received anything. */
++	#lastHeard = 0;
++	/** When the outstanding liveness probe was sent, and how long it may go unanswered. */
++	#probe: { sentAt: number; timeoutMs: number } | null = null;
++	#livenessTimer: Timer | undefined;
++	/** Whether onOpen fired for the current socket (probes before that would race the hello). */
++	#opened = false;
+ 
+ 	constructor(opts: CollabSocketOptions) {
+ 		this.#opts = opts;
+@@ -69,6 +96,97 @@ export class CollabSocket {
+ 		this.#openSocket();
+ 	}
+ 
++	/**
++	 * The tab became visible or the network came back. A pending retry fires
++	 * now instead of waiting out its backoff; an open socket is probed with a
++	 * short deadline, so a connection that died while the tab slept is replaced
++	 * within seconds instead of after the OS-level timeout.
++	 */
++	wake(): void {
++		if (!this.#active()) return;
++		if (this.#retryTimer !== undefined) {
++			this.#clearRetry();
++			this.#attempt = 0;
++			this.#openSocket();
++			return;
++		}
++		const ws = this.#ws;
++		if (ws?.readyState === WebSocket.OPEN && this.#opened) this.#sendProbe(LIVENESS_WAKE_TIMEOUT_MS);
++	}
++
++	/** Drop the current connection (if any) and dial again immediately, as a fresh join would. */
++	reconnectNow(): void {
++		if (!this.#active()) return;
++		this.#clearRetry();
++		this.#abandonSocket();
++		this.#attempt = 0;
++		this.#openSocket();
++	}
++
++	/** connect() ran and neither close() nor a fatal failure has ended it. */
++	#active(): boolean {
++		return !this.#closed && (this.#ws !== null || this.#retryTimer !== undefined);
++	}
++
++	#sendProbe(timeoutMs: number): void {
++		if (this.#probe !== null && this.#probe.sentAt >= this.#lastHeard) {
++			// Already waiting on one; only tighten its deadline.
++			this.#probe.timeoutMs = Math.min(this.#probe.timeoutMs, timeoutMs);
++			return;
++		}
++		this.#probe = { sentAt: Date.now(), timeoutMs };
++		this.send({ t: "fetch-transcript", reqId: LIVENESS_PROBE_REQ_ID, agentId: "", fromByte: 0 });
++	}
++
++	#startLiveness(ws: WebSocket): void {
++		this.#stopLiveness();
++		this.#lastHeard = Date.now();
++		this.#probe = null;
++		this.#livenessTimer = setInterval(() => {
++			if (this.#ws !== ws || ws.readyState !== WebSocket.OPEN) return;
++			const now = Date.now();
++			const probe = this.#probe;
++			if (probe !== null && this.#lastHeard <= probe.sentAt) {
++				// Judge only an actually-sent probe: background tabs throttle timers,
++				// so a long gap between ticks alone proves nothing.
++				if (now - probe.sentAt < probe.timeoutMs) return;
++				console.warn("collab: relay connection stopped responding; reconnecting");
++				this.#abandonSocket();
++				this.#handleClose(1006, "relay stopped responding");
++				return;
++			}
++			if (this.#opened && now - this.#lastHeard >= LIVENESS_PROBE_AFTER_MS) {
++				this.#sendProbe(LIVENESS_PROBE_TIMEOUT_MS);
++			}
++		}, LIVENESS_TICK_MS);
++	}
++
++	#stopLiveness(): void {
++		if (this.#livenessTimer !== undefined) {
++			clearInterval(this.#livenessTimer);
++			this.#livenessTimer = undefined;
++		}
++		this.#probe = null;
++	}
++
++	/** Detach and close the current socket without reporting a close (the caller decides what follows). */
++	#abandonSocket(): void {
++		this.#stopLiveness();
++		const ws = this.#ws;
++		this.#ws = null;
++		this.#opened = false;
++		if (!ws) return;
++		ws.onopen = null;
++		ws.onmessage = null;
++		ws.onclose = null;
++		ws.onerror = null;
++		try {
++			ws.close(1000);
++		} catch {
++			// already closing/closed
++		}
++	}
++
+ 	send(frame: GuestFrame, targetPeer = 0): void {
+ 		this.#sendChain = this.#sendChain
+ 			.then(async () => {
+@@ -92,12 +210,14 @@ export class CollabSocket {
+ 	close(): void {
+ 		const hadActivity = this.#ws !== null || this.#retryTimer !== undefined;
+ 		this.#clearRetry();
++		this.#stopLiveness();
+ 		const wasClosed = this.#closed;
+ 		this.#closed = true;
+ 		this.#retryMissingRoom = false;
+ 		this.#pendingSends.length = 0;
+ 		const ws = this.#ws;
+ 		this.#ws = null;
++		this.#opened = false;
+ 		if (ws) {
+ 			try {
+ 				ws.close(1000);
+@@ -112,15 +232,19 @@ export class CollabSocket {
+ 		const ws = new WebSocket(`${this.#opts.wsUrl}?role=${this.#opts.role}`);
+ 		ws.binaryType = "arraybuffer";
+ 		this.#ws = ws;
++		this.#opened = false;
+ 		ws.onopen = () => {
+ 			if (this.#ws !== ws) return;
+ 			if (!this.#retryMissingRoom) this.#attempt = 0;
++			this.#startLiveness(ws);
++			this.#opened = true;
+ 			for (const envelope of this.#pendingSends) ws.send(envelope);
+ 			this.#pendingSends.length = 0;
+ 			this.onOpen?.();
+ 		};
+ 		ws.onmessage = (event: MessageEvent) => {
+ 			if (this.#ws !== ws) return;
++			this.#lastHeard = Date.now();
+ 			this.#handleMessage(ws, event.data);
+ 		};
+ 		ws.onerror = () => {
+@@ -128,7 +252,9 @@ export class CollabSocket {
+ 		};
+ 		ws.onclose = (event: CloseEvent) => {
+ 			if (this.#ws !== ws) return;
++			this.#stopLiveness();
+ 			this.#ws = null;
++			this.#opened = false;
+ 			this.#handleClose(event.code, event.reason);
+ 		};
+ 	}
+@@ -198,9 +324,11 @@ export class CollabSocket {
+ 		if (this.#closed) return;
+ 		this.#closed = true;
+ 		this.#clearRetry();
++		this.#stopLiveness();
+ 		this.#pendingSends.length = 0;
+ 		const ws = this.#ws;
+ 		this.#ws = null;
++		this.#opened = false;
+ 		if (ws) {
+ 			try {
+ 				ws.close(1000);
+diff --git a/packages/collab-web/test/client.test.ts b/packages/collab-web/test/client.test.ts
+index 2078e32..bcc1398 100644
+--- a/packages/collab-web/test/client.test.ts
++++ b/packages/collab-web/test/client.test.ts
+@@ -93,7 +93,7 @@ describe("GuestClient frame apply", () => {
+ 		expect(client.getSnapshot().readOnly).toBe(true);
+ 	});
+ 
+-	it("times out stalled snapshot chunks and resets the clock on progress", () => {
++	it("redials a stalled snapshot, ends after repeated stalls, and resets the clock on progress", () => {
+ 		vi.useFakeTimers();
+ 		try {
+ 			const firstEntry = messageEntry("e1", { role: "user", content: "hi", timestamp: 1 });
+@@ -109,7 +109,15 @@ describe("GuestClient frame apply", () => {
+ 
+ 			vi.advanceTimersByTime(29_999);
+ 			expect(client.getSnapshot().phase).toBe("connecting");
++			// A stall redials instead of ending: the next welcome restarts the snapshot.
+ 			vi.advanceTimersByTime(1);
++			expect(client.getSnapshot().phase).toBe("reconnecting");
++			expect(client.getSnapshot().loading).toBeNull();
++			client.applyFrameForTest(welcomeFrame(2));
++			vi.advanceTimersByTime(30_000);
++			expect(client.getSnapshot().phase).toBe("reconnecting");
++			client.applyFrameForTest(welcomeFrame(2));
++			vi.advanceTimersByTime(30_000);
+ 			const snap = client.getSnapshot();
+ 			expect(snap.phase).toBe("ended");
+ 			expect(snap.endedReason).toBe("timed out waiting for the host's session snapshot");
+diff --git a/packages/collab-web/test/socket-reconnect.test.ts b/packages/collab-web/test/socket-reconnect.test.ts
+index 9923687..2ec5ba2 100644
+--- a/packages/collab-web/test/socket-reconnect.test.ts
++++ b/packages/collab-web/test/socket-reconnect.test.ts
+@@ -1,6 +1,8 @@
+ import { afterEach, describe, expect, it, vi } from "bun:test";
+ import { GuestClient } from "../src/lib/client";
+-import { encodeBase64Url } from "../src/lib/link";
++import type { HostFrame } from "@oh-my-pi/pi-wire";
++import { COLLAB_PROTO, encodeBase64Url } from "../src/lib/link";
++import { CollabSocket, LIVENESS_PROBE_AFTER_MS, LIVENESS_PROBE_TIMEOUT_MS } from "../src/lib/socket";
+ 
+ const NativeWebSocket = globalThis.WebSocket;
+ const LINK = `transient-network-room#${encodeBase64Url(new Uint8Array(32))}`;
+@@ -114,3 +116,75 @@ describe("browser guest room recovery", () => {
+ 		expect(ScriptedWebSocket.instances).toHaveLength(1);
+ 	});
+ });
++
++const WELCOME: HostFrame = {
++	t: "welcome",
++	proto: COLLAB_PROTO,
++	header: { type: "session", id: "s1", timestamp: "2026-06-12T00:00:00Z", cwd: "/work" },
++	state: { isStreaming: false, queuedMessageCount: 0, cwd: "/work", participants: [] },
++	agents: [],
++	entryCount: 0,
++};
++
++describe("browser guest liveness", () => {
++	it("replaces a connection that stops answering after a liveness probe", () => {
++		vi.useFakeTimers();
++		vi.spyOn(Math, "random").mockReturnValue(0.5);
++		installScriptedWebSocket();
++		const client = new GuestClient(LINK, "tester");
++		try {
++			client.connect();
++			instance(0).open();
++			client.applyFrameForTest(WELCOME);
++			expect(client.getSnapshot().phase).toBe("live");
++			// Probe goes out after the quiet period; its deadline then expires.
++			vi.advanceTimersByTime(LIVENESS_PROBE_AFTER_MS + LIVENESS_PROBE_TIMEOUT_MS + 5_000);
++			expect(client.getSnapshot().phase).toBe("reconnecting");
++			vi.advanceTimersByTime(1_000);
++			expect(ScriptedWebSocket.instances).toHaveLength(2);
++		} finally {
++			client.close();
++		}
++	});
++
++	it("keeps a connection that keeps talking", () => {
++		vi.useFakeTimers();
++		installScriptedWebSocket();
++		const client = new GuestClient(LINK, "tester");
++		try {
++			client.connect();
++			instance(0).open();
++			client.applyFrameForTest(WELCOME);
++			for (let i = 0; i < 30; i++) {
++				vi.advanceTimersByTime(5_000);
++				instance(0).message('{"t":"noop"}');
++			}
++			expect(ScriptedWebSocket.instances).toHaveLength(1);
++			expect(client.getSnapshot().phase).toBe("live");
++		} finally {
++			client.close();
++		}
++	});
++
++	it("wake() skips a pending reconnect backoff, and never dials an unstarted socket", () => {
++		vi.useFakeTimers();
++		vi.spyOn(Math, "random").mockReturnValue(0.5);
++		installScriptedWebSocket();
++		const idle = new CollabSocket({ wsUrl: "ws://localhost:1/r/x", role: "guest", key: {} as CryptoKey });
++		idle.wake();
++		idle.reconnectNow();
++		expect(ScriptedWebSocket.instances).toHaveLength(0);
++
++		const socket = new CollabSocket({ wsUrl: "ws://localhost:1/r/x", role: "guest", key: {} as CryptoKey });
++		try {
++			socket.connect();
++			instance(0).open();
++			instance(0).relayClose(1006, "network lost");
++			expect(ScriptedWebSocket.instances).toHaveLength(1);
++			socket.wake();
++			expect(ScriptedWebSocket.instances).toHaveLength(2);
++		} finally {
++			socket.close();
++		}
++	});
++});

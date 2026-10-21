@@ -23,7 +23,9 @@
 
         gamescope = {
           enable = true;
-          capSysNice = true;
+          # Must stay false: with gamescopeSession it makes nixpkgs run Steam
+          # through a setuid bwrap, which bubblewrap >= 0.11 refuses to start.
+          capSysNice = false;
         };
       };
     };

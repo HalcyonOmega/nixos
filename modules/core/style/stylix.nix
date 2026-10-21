@@ -9,6 +9,8 @@
 
       disabledModules = [
         "${inputs.stylix}/modules/kmscon/nixos.nix"
+        # NixOS 26.05 removed ReGreet's old option path; this KDE host does not use it.
+        "${inputs.stylix}/modules/regreet/nixos.nix"
       ];
 
       stylix = {

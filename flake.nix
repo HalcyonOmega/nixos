@@ -20,7 +20,7 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -33,7 +33,7 @@
     nur.url = "github:nix-community/NUR";
 
     stylix = {
-      url = "github:nix-community/stylix";
+      url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -78,6 +78,12 @@
 
     jetlang.url = "git+file:///home/nate/Projects/Github/jet";
 
+    # Helios (Sunshine fork): per-session KDE virtual displays, per-app audio, Steam library import.
+    helios = {
+      url = "git+file:///home/nate/Projects/Github/helios";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     codex-desktop-linux = {
       url = "github:ilysenko/codex-desktop-linux";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -95,10 +101,16 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    # Oh My Pi (omp) coding agent harness; bump via `nix flake update omp-flake`.
+    # Oh My Pi (omp) coding agent harness. omp-flake supplies the Home Manager
+    # module; the package is built from the upstream source tag below so local
+    # patches (modules/apps/dev/patches/omp-*.patch) apply. Bump by editing the tag.
     omp-flake = {
       url = "github:cernoh/omp-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    oh-my-pi = {
+      url = "github:can1357/oh-my-pi/v18.12.5";
     };
   };
 
@@ -112,7 +124,7 @@
       username = "nate";
       system = "x86_64-linux";
       githubUsername = "HalcyonOmega";
-      githubEmail = "nathanbrown@me.com";
+      githubEmail = "129798039+HalcyonOmega@users.noreply.github.com";
       pkgs-unstable = import inputs.nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;

@@ -1,0 +1,280 @@
+diff --git a/packages/coding-agent/src/modes/controllers/extension-ui-controller.ts b/packages/coding-agent/src/modes/controllers/extension-ui-controller.ts
+index 533abf8..4f753a2 100644
+--- a/packages/coding-agent/src/modes/controllers/extension-ui-controller.ts
++++ b/packages/coding-agent/src/modes/controllers/extension-ui-controller.ts
+@@ -700,8 +700,17 @@ export class ExtensionUiController {
+ 					prompt.title,
+ 					prefill,
+ 					(text, images) => finishPrompt({ text, images }),
+-					() => finishPrompt(undefined),
+-					{ promptStyle: true, externalEditor: editDialogExternally, question: prompt.question, ...options },
++					draft => {
++						prompt.saveDraft?.(draft);
++						finishPrompt(undefined);
++					},
++					{
++						promptStyle: true,
++						externalEditor: editDialogExternally,
++						question: prompt.question,
++						choices: prompt.choices,
++						...options,
++					},
+ 				);
+ 				this.ctx.editorContainer.clear();
+ 				this.ctx.editorContainer.addChild(promptEditor);
+diff --git a/packages/tui/src/overlays/ask-dialog.ts b/packages/tui/src/overlays/ask-dialog.ts
+index cc0b3b6..96a433e 100644
+--- a/packages/tui/src/overlays/ask-dialog.ts
++++ b/packages/tui/src/overlays/ask-dialog.ts
+@@ -132,6 +132,10 @@ export interface AskDialogPrompt {
+ 	title: string;
+ 	/** The question being answered, verbatim. */
+ 	question: string;
++	/** The question's answer choices, shown with the question so a custom answer can reference them. */
++	choices?: readonly ExtensionAskDialogOption[];
++	/** Keep the prompt's text when it is cancelled, so reopening it restores the draft. */
++	saveDraft?(draft: AskDialogPromptValue): void;
+ }
+ 
+ interface AskDialogCallbacks {
+@@ -166,6 +170,8 @@ interface QuestionState {
+ 	selectedOptions: Set<string>;
+ 	customInput: string | undefined;
+ 	customInputImages: ImageContent[] | undefined;
++	/** Text left in a cancelled custom-answer prompt; it prefills the next one. */
++	customDraft: AskDialogPromptValue | undefined;
+ 	note: string | undefined;
+ 	noteImages: ImageContent[] | undefined;
+ 	noteRowKey: string | undefined;
+@@ -574,6 +580,7 @@ export class AskDialogComponent implements Component {
+ 				selectedOptions: new Set<string>(),
+ 				customInput: undefined,
+ 				customInputImages: undefined,
++				customDraft: undefined,
+ 				note: undefined,
+ 				noteImages: undefined,
+ 				noteRowKey: undefined,
+@@ -1299,10 +1306,26 @@ export class AskDialogComponent implements Component {
+ 	): Promise<void> {
+ 		this.#promptActive = true;
+ 		try {
+-			const prefill =
++			const committed =
+ 				state.customInput === undefined ? undefined : { text: state.customInput, images: state.customInputImages };
+-			const result = await this.#openPrompt({ title: "Custom answer", question: question.question }, prefill);
++			const prefill = state.customDraft ?? committed;
++			const labels = displayOptionLabels(question);
++			const result = await this.#openPrompt(
++				{
++					title: "Custom answer",
++					question: question.question,
++					choices: question.options.map((option, index) => ({
++						label: labels[index] ?? option.label,
++						description: option.description,
++					})),
++					saveDraft: draft => {
++						state.customDraft = draft.text.trim() === "" ? undefined : draft;
++					},
++				},
++				prefill,
++			);
+ 			if (result === undefined || this.#closed) return;
++			state.customDraft = undefined;
+ 			const input = splitPromptInput(result);
+ 			if (input.text.trim() === "") {
+ 				// Submitting an empty value unselects the custom answer.
+diff --git a/packages/tui/src/overlays/hook-editor.ts b/packages/tui/src/overlays/hook-editor.ts
+index 3884600..ae3cd6a 100644
+--- a/packages/tui/src/overlays/hook-editor.ts
++++ b/packages/tui/src/overlays/hook-editor.ts
+@@ -11,6 +11,7 @@ import type { ImageContent } from "@oh-my-pi/pi-ai";
+ import { compactImageMarkers, formatVisionMarker, PLACEHOLDER_REGEX } from "../prompt/composer-attachments";
+ import { extractImagePastePathsFromText } from "../prompt/custom-editor";
+ import {
++	type Component,
+ 	Editor,
+ 	Ellipsis,
+ 	type Focusable,
+@@ -56,6 +57,48 @@ export function boundPromptTitle(prefix: string, question: string): string {
+ 	return [...kept, last].join("\n");
+ }
+ 
++/** One answer choice listed under a prompt's question (`HookEditorOptions.choices`). */
++export interface HookEditorChoice {
++	label: string;
++	description?: string;
++}
++
++/** Text and images in the editor when the prompt submits or cancels. */
++export interface HookEditorValue {
++	text: string;
++	images?: ImageContent[];
++}
++
++function flattenInline(text: string): string {
++	return replaceTabs(sanitizeCarriageReturns(text)).replace(/\s+/g, " ").trim();
++}
++
++/** The whole question and its numbered choices as terminal rows for the prompt body. */
++function promptContextChildren(question: string, choices: readonly HookEditorChoice[]): Component[] {
++	const children: Component[] = [];
++	for (const line of replaceTabs(sanitizeCarriageReturns(question)).trim().split("\n")) {
++		children.push(line.trim() ? new Text(theme.fg("accent", line), 0, 0) : new Spacer(1));
++	}
++	children.push(new Spacer(1));
++	choices.forEach((choice, index) => {
++		children.push(
++			new Text(`${theme.fg("dim", `${index + 1}.`)} ${theme.fg("text", flattenInline(choice.label))}`, 0, 0),
++		);
++		const description = choice.description ? flattenInline(choice.description) : "";
++		if (description) children.push(new Text(theme.fg("muted", description), 3, 0));
++	});
++	return children;
++}
++
++/** The question and its choices as markdown for native hosts. */
++function promptContextMarkdown(question: string, choices: readonly HookEditorChoice[]): string {
++	const list = choices.map((choice, index) => {
++		const description = choice.description ? flattenInline(choice.description) : "";
++		return `${index + 1}. ${flattenInline(choice.label)}${description ? ` — ${description}` : ""}`;
++	});
++	return `${replaceTabs(sanitizeCarriageReturns(question))}\n\n${list.join("\n")}`;
++}
++
+ export interface HookEditorOptions {
+ 	/** Edit text with the host's configured external editor. */
+ 	externalEditor?: (text: string) => Promise<string | null>;
+@@ -67,6 +110,12 @@ export interface HookEditorOptions {
+ 	 * as markdown, under the title.
+ 	 */
+ 	question?: string;
++	/**
++	 * The answer choices of `question`. When set, the terminal shows the whole question and
++	 * every choice under the title (instead of the three-row cut), so a free-text answer can
++	 * reference them while it is typed.
++	 */
++	choices?: readonly HookEditorChoice[];
+ 	/** Allow clipboard images to be attached to this prompt. */
+ 	acceptImages?: boolean;
+ 	/** Images already represented by markers in the prefilled text. */
+@@ -97,7 +146,7 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+ 	#editor: Editor;
+ 	#field: FormField;
+ 	#onSubmitCallback: (value: string, images?: ImageContent[]) => void;
+-	#onCancelCallback: () => void;
++	#onCancelCallback: (draft: HookEditorValue) => void;
+ 	#tui: TUI;
+ 	#promptStyle: boolean;
+ 	#acceptImages: boolean;
+@@ -119,15 +168,20 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+ 		title: string,
+ 		prefill: string | undefined,
+ 		onSubmit: (value: string, images?: ImageContent[]) => void,
+-		onCancel: () => void,
++		onCancel: (draft: HookEditorValue) => void,
+ 		options?: HookEditorOptions,
+ 	) {
+ 		// First title line insets into the panel border; remaining lines (e.g. the
+ 		// bounded ask question) stay as body rows so they are never truncated into
+-		// the one-row border.
++		// the one-row border. With choices, the whole question and every choice
++		// render as body rows instead, so the answer can reference them.
+ 		const question = options?.question;
+-		const terminalTitle = question === undefined ? title : boundPromptTitle(`${title}: `, question);
++		const choices = question !== undefined && options?.choices?.length ? options.choices : undefined;
++		const terminalTitle =
++			question === undefined || choices !== undefined ? title : boundPromptTitle(`${title}: `, question);
+ 		const [titleLine = "", ...detailLines] = terminalTitle.split("\n");
++		const contextChildren =
++			question !== undefined && choices !== undefined ? promptContextChildren(question, choices) : undefined;
+ 		super(titleLine, "omp.overlay.hook-editor");
+ 
+ 		this.#tui = tui;
+@@ -152,7 +206,12 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+ 		// Bound the editor so long content scrolls instead of pushing the
+ 		// submit hint off-screen. Caller may override via options.maxHeight.
+ 		const termRows = this.#tui.terminal?.rows ?? process.stdout.rows ?? 40;
+-		this.#editor.setMaxHeight(options?.maxHeight ?? Math.max(3, termRows - 12));
++		const termColumns = this.#tui.terminal?.columns ?? process.stdout.columns ?? 80;
++		const contextRows = (contextChildren ?? []).reduce(
++			(rows, child) => rows + child.render(Math.max(1, termColumns - PROMPT_TITLE_CHROME_COLUMNS)).length,
++			0,
++		);
++		this.#editor.setMaxHeight(options?.maxHeight ?? Math.max(3, termRows - 12 - contextRows));
+ 		this.#editor.setScrollbarVisible(true);
+ 		if (prefill) {
+ 			this.#editor.setText(prefill);
+@@ -166,8 +225,9 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+ 			: `${formatKeyHints(followUpKeys)} submit  ${interruptKey()} cancel  ${externalEditorKey} external editor`;
+ 		this.#field = new FormField(this.#editor, {
+ 			theme: formTheme,
+-			details:
+-				detailLines.length > 0
++			details: contextChildren
++				? [new Spacer(1), ...contextChildren]
++				: detailLines.length > 0
+ 					? [new Spacer(1), ...detailLines.map(line => new Text(theme.fg("accent", line), 0, 0))]
+ 					: undefined,
+ 			hint,
+@@ -195,7 +255,13 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+ 			nativeChildren.push(
+ 				node(
+ 					"md",
+-					{ text: replaceTabs(sanitizeCarriageReturns(question)), role: "omp.ask.question" },
++					{
++						text:
++							choices !== undefined
++								? promptContextMarkdown(question, choices)
++								: replaceTabs(sanitizeCarriageReturns(question)),
++						role: "omp.ask.question",
++					},
+ 					undefined,
+ 					"question",
+ 				),
+@@ -270,24 +336,23 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+ 			this.#submitQueued = true;
+ 			return;
+ 		}
+-		let text = this.#editor.getExpandedText();
++		const { text, images } = this.#currentValue();
+ 		if (requireText && text.trim().length === 0) return;
+-		let images: ImageContent[] | undefined;
+-		if (this.#images.length > 0) {
+-			// Path pastes attach as they finish loading; submit numbers images in text order.
+-			const compacted = compactImageMarkers(text, this.#images.length, { byAppearance: true });
+-			if (compacted) {
+-				text = compacted.text;
+-				images = compacted.keep.map(index => this.#images[index]);
+-			} else {
+-				images = this.#images;
+-			}
+-		}
+ 		this.dispose();
+ 		if (images?.length) this.#onSubmitCallback(text, images);
+ 		else this.#onSubmitCallback(text);
+ 	}
+ 
++	/** Editor text with image markers numbered in text order, and the images they keep. */
++	#currentValue(): HookEditorValue {
++		const text = this.#editor.getExpandedText();
++		if (this.#images.length === 0) return { text };
++		// Path pastes attach as they finish loading; submit numbers images in text order.
++		const compacted = compactImageMarkers(text, this.#images.length, { byAppearance: true });
++		if (!compacted) return { text, images: this.#images };
++		return { text: compacted.text, images: compacted.keep.map(index => this.#images[index]) };
++	}
++
+ 	/** Whether this prompt opted into clipboard image attachments. */
+ 	get acceptsImages(): boolean {
+ 		return this.#acceptImages && !this.#disposed;
+@@ -335,8 +400,9 @@ export class HookEditorComponent extends OverlayPanel implements Focusable {
+ 	}
+ 
+ 	#cancel(): void {
++		const draft = this.#currentValue();
+ 		this.dispose();
+-		this.#onCancelCallback();
++		this.#onCancelCallback(draft.images?.length ? draft : { text: draft.text });
+ 	}
+ 
+ 	/** Route non-bracketed paste transports (e.g. kitty's OSC 5522 enhanced clipboard)

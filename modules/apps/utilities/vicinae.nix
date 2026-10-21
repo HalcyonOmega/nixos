@@ -2,6 +2,7 @@
 {
   flake.nixosModules.vicinae =
     {
+      lib,
       pkgs,
       username,
       inputs,
@@ -76,7 +77,7 @@
           };
         };
 
-        services.vicinae = {
+        programs.vicinae = {
           enable = true;
           systemd = {
             enable = true;
@@ -94,7 +95,7 @@
             font = {
               normal = {
                 size = 12;
-                family = "Atkinson Hyperlegible Next";
+                family = lib.mkForce "Atkinson Hyperlegible Next";
               };
             };
             launcher_window = {
@@ -113,7 +114,7 @@
             };
           };
           extensions = with inputs.vicinae-extensions.packages.${pkgs.stdenv.hostPlatform.system}; [
-            bluetooth
+            # Upstream omits Bluetooth from package outputs because dbus-next fails to build.
             nix
             power-profile
             # flathub - find name

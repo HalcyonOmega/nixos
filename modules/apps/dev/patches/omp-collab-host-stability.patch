@@ -1,0 +1,679 @@
+diff --git a/packages/coding-agent/src/collab/host.ts b/packages/coding-agent/src/collab/host.ts
+index f0301e5..7e37086 100644
+--- a/packages/coding-agent/src/collab/host.ts
++++ b/packages/coding-agent/src/collab/host.ts
+@@ -55,6 +55,7 @@ import {
+ 	publishCollabHost,
+ } from "./registry";
+ import { CollabSocket } from "./relay-client";
++import { cfgCollabHistoryEntries, cfgCollabRecentAgents } from "./settings";
+ import {
+ 	COLLAB_ENTRY_OMITTED_CUSTOM_TYPE,
+ 	copyForReplication,
+@@ -78,7 +79,11 @@ const STATE_TRIGGER_EVENTS: Record<string, true> = {
+ };
+ 
+ const STATE_DEBOUNCE_MS = 100;
+-const AGENTS_DEBOUNCE_MS = 100;
++/**
++ * Registry changes fire for every subagent status/activity tick; with dozens of
++ * live subagents a 100 ms debounce re-sent the whole roster ten times a second.
++ */
++const AGENTS_DEBOUNCE_MS = 400;
+ const STREAMING_STATE_INTERVAL_MS = 2000;
+ const WELCOME_IMAGE_STRIP_THRESHOLD = 24 * 1024 * 1024;
+ const WIRE_AGENT_EVENT_TYPES: Record<WireAgentEvent["type"], true> = {
+@@ -132,6 +137,15 @@ const TRANSCRIPT_ENTRY_TOO_LARGE_ERROR = `transcript entry exceeds transcript fe
+  * and the seal step care about — not UTF-16 code units (#11433).
+  */
+ const SNAPSHOT_CHUNK_BYTES = 512 * 1024;
++/**
++ * Byte budget for the history a guest receives on join/reconnect. The default
++ * relay sustains roughly 350 KB/s, so a full multi-hundred-MB transcript took
++ * minutes to land (and had to be resent on every reconnect); the tail keeps a
++ * join in the seconds range. Entries before it stay on the host.
++ */
++const SNAPSHOT_HISTORY_BYTES = 3 * 1024 * 1024;
++/** `customType` of the marker entry that stands in for history not sent to a guest. */
++export const COLLAB_HISTORY_OMITTED_CUSTOM_TYPE = "collab-history-omitted";
+ const MAX_PENDING_UI_REQUESTS = 64;
+ /**
+  * Outcome of {@link CollabHost.requestGuestUi}. `answered` carries the guest's
+@@ -239,6 +253,8 @@ export class CollabHost {
+ 	#uiReqSeq = 0;
+ 	#pendingUi = new Map<number, PendingCollabUiRequest>();
+ 	#lastStateJson = "";
++	/** Last broadcast roster; a registry tick that changes nothing guests see is not re-sent. */
++	#lastAgentsJson = "";
+ 	#stateDebounce: Timer | null = null;
+ 	#streamingInterval: Timer | null = null;
+ 	#agentsDebounce: Timer | null = null;
+@@ -468,7 +484,18 @@ export class CollabHost {
+ 			for (const channel of COLLAB_BUS_CHANNELS) {
+ 				this.#busUnsubscribers.push(
+ 					observabilityBus.on(channel, data => {
+-						if (this.#broadcastAllowed()) this.#send({ t: "bus", channel, data });
++						if (!this.#broadcastAllowed()) return;
++						// Progress payloads are full per-agent snapshots: a newer one
++						// supersedes any still queued for the same agent.
++						const progressId =
++							channel === TASK_SUBAGENT_PROGRESS_CHANNEL
++								? (data as { progress?: { id?: unknown } } | undefined)?.progress?.id
++								: undefined;
++						this.#send(
++							{ t: "bus", channel, data },
++							0,
++							typeof progressId === "string" ? `bus:progress:${progressId}` : undefined,
++						);
+ 					}),
+ 				);
+ 			}
+@@ -674,12 +701,12 @@ export class CollabHost {
+ 	 * final goodbye. Pre-serialized broadcasts gate on {@link #broadcastAllowed},
+ 	 * which applies the same liveness/session checks.
+ 	 */
+-	#send(frame: CollabFrame, toPeer = 0): void {
++	#send(frame: CollabFrame, toPeer = 0, coalesceKey?: string): void {
+ 		// Ending an existing dialog contains only its old-room request ID, never
+ 		// current-session data. Do not strand guests if it settles during a
+ 		// provisional /resume that later rolls back. All other traffic stays gated.
+ 		if (this.ending || (!this.#sessionStillCurrent() && frame.t !== "ui-request-end")) return;
+-		this.#socket?.send(frame, toPeer);
++		this.#socket?.send(frame, toPeer, coalesceKey);
+ 	}
+ 
+ 	/**
+@@ -696,7 +723,16 @@ export class CollabHost {
+ 	/** Broadcast one session event, bounded and serialized exactly once. */
+ 	#broadcastEvent(event: AgentSessionEvent): void {
+ 		if (!this.#broadcastAllowed()) return;
+-		this.#socket?.send(encodeEventFrame(serializeReplicatedEvent(event).json));
++		// `message_update` carries the cumulative message and tool updates carry
++		// the latest partial result, so a newer one supersedes any still queued:
++		// a slow relay then sees one frame per stream instead of one per token.
++		const coalesceKey =
++			event.type === "message_update"
++				? "event:message_update"
++				: event.type === "tool_execution_update"
++					? `event:tool_update:${event.toolCallId}`
++					: undefined;
++		this.#socket?.send(encodeEventFrame(serializeReplicatedEvent(event).json), 0, coalesceKey);
+ 	}
+ 
+ 	#handleFrame(frame: CollabFrame, fromPeer: number): void {
+@@ -794,12 +830,15 @@ export class CollabHost {
+ 		// copy. Chunk frames are assembled from these strings only as the
+ 		// transport drains.
+ 		const snapshot = this.#ctx.sessionManager.snapshotForReplication();
+-		const snapshotEntries = this.#serializeSnapshotEntries(snapshot.entries.filter(isWireSessionEntry));
++		const snapshotEntries = this.#historyTail(snapshot.entries.filter(isWireSessionEntry));
+ 		const state = this.#buildState();
+ 		// State broadcasts pause while no guest is joined, so the dedupe baseline
+ 		// may predate this welcome; with no other peer to keep current, the welcome
+ 		// becomes the baseline.
+ 		if (firstPeer) this.#lastStateJson = JSON.stringify(state);
++		// This guest's roster comes from the welcome; the next registry change
++		// must reach it even if it matches the roster other guests saw last.
++		this.#lastAgentsJson = "";
+ 		this.#send(
+ 			{
+ 				t: "welcome",
+@@ -827,6 +866,70 @@ export class CollabHost {
+ 		this.#scheduleStateBroadcast();
+ 	}
+ 
++	/**
++	 * The history a joining (or reconnecting) guest receives: the latest
++	 * `collab.historyEntries` entries, further trimmed from the front to
++	 * {@link SNAPSHOT_HISTORY_BYTES}. Long-running sessions hold tens of
++	 * thousands of entries; shipping all of them through the relay took minutes
++	 * per join and was repeated on every reconnect.
++	 *
++	 * Entries whose parent was not sent are re-rooted onto one display-only
++	 * marker entry, so the replica's branch walk stays connected and both the
++	 * TUI and browser guests show that earlier history exists on the host.
++	 * The last entry is always kept, even when it alone exceeds the budget.
++	 */
++	#historyTail(entries: ReplicatedEntry[]): { json: string[]; bytes: number[] } {
++		const configured = cfgCollabHistoryEntries.get(this.#ctx.settings);
++		const limit = Number.isFinite(configured) && configured > 0 ? Math.floor(configured) : 0;
++		if (limit === 0) return this.#serializeSnapshotEntries(entries);
++		const candidates = entries.length > limit ? entries.slice(-limit) : entries;
++		const serialized = this.#serializeSnapshotEntries(candidates);
++		let start = serialized.json.length;
++		let total = 0;
++		while (start > 0) {
++			const entryBytes = serialized.bytes[start - 1] ?? 0;
++			if (start < serialized.json.length && total + entryBytes > SNAPSHOT_HISTORY_BYTES) break;
++			total += entryBytes;
++			start--;
++		}
++		const kept = candidates.slice(start);
++		const omitted = entries.length - kept.length;
++		const first = kept[0];
++		if (omitted === 0 || !first) return serialized;
++		const json = serialized.json.slice(start);
++		const bytes = serialized.bytes.slice(start);
++		const marker: ReplicatedEntry = {
++			type: "custom_message",
++			id: `collab-history-${first.id}`,
++			parentId: null,
++			timestamp: first.timestamp,
++			customType: COLLAB_HISTORY_OMITTED_CUSTOM_TYPE,
++			display: true,
++			content: `…${omitted.toLocaleString("en-US")} earlier ${omitted === 1 ? "entry" : "entries"} not loaded — collab guests receive the latest history only (setting: collab.historyEntries)`,
++		};
++		const keptIds = new Set<string>();
++		for (const entry of kept) keptIds.add(entry.id);
++		for (const [i, entry] of kept.entries()) {
++			if (entry.parentId === null || keptIds.has(entry.parentId)) continue;
++			const text = json[i];
++			if (text === undefined) continue;
++			try {
++				const copy = JSON.parse(text) as { parentId: string | null };
++				copy.parentId = marker.id;
++				const rerooted = JSON.stringify(copy);
++				json[i] = rerooted;
++				bytes[i] = Buffer.byteLength(rerooted, "utf8");
++			} catch {
++				// Already bounded JSON; a dangling parent only ends the branch walk early.
++			}
++		}
++		const markerJson = JSON.stringify(marker);
++		json.unshift(markerJson);
++		bytes.unshift(Buffer.byteLength(markerJson, "utf8"));
++		logger.debug("collab welcome sending history tail", { sent: kept.length, omitted, bytes: total });
++		return { json, bytes };
++	}
++
+ 	/**
+ 	 * Serialize every snapshot entry exactly once, bounded under
+ 	 * {@link MAX_REPLICATED_PAYLOAD_BYTES}. Only an entry that throws or exceeds
+@@ -1117,25 +1220,54 @@ export class CollabHost {
+ 		}
+ 	}
+ 
++	/**
++	 * The roster guests see. A long-running session accumulates thousands of
++	 * finished subagents; mirroring every one made each `agents` frame huge,
++	 * re-sent it on every registry tick, and buried the live agents in the
++	 * guest panel. Live agents (`running`/`idle`) are always included, plus the
++	 * `collab.recentAgents` most recently active finished ones and every
++	 * ancestor of an included agent so the tree stays connected.
++	 */
+ 	#snapshotAgents(): AgentSnapshot[] {
+-		return (
+-			AgentRegistry.global()
+-				.list()
+-				// Advisor transcripts are local observability only; never mirror them to
+-				// guests (the wire AgentSnapshot kind has no `advisor`, and guests must not
+-				// be able to chat/kill/revive them).
+-				.filter((ref): ref is AgentRef & { kind: "main" | "sub" } => ref.kind !== "advisor")
+-				.map(ref => ({
+-					id: ref.id,
+-					displayName: ref.displayName,
+-					kind: ref.kind,
+-					parentId: ref.parentId,
+-					status: ref.status,
+-					hasSessionFile: !!ref.sessionFile,
+-					createdAt: ref.createdAt,
+-					lastActivity: ref.lastActivity,
+-				}))
+-		);
++		const refs = AgentRegistry.global()
++			.list()
++			// Advisor transcripts are local observability only; never mirror them to
++			// guests (the wire AgentSnapshot kind has no `advisor`, and guests must not
++			// be able to chat/kill/revive them).
++			.filter((ref): ref is AgentRef & { kind: "main" | "sub" } => ref.kind !== "advisor");
++		const configured = cfgCollabRecentAgents.get(this.#ctx.settings);
++		const recentLimit = Number.isFinite(configured) ? Math.floor(configured) : 12;
++		let selected = refs;
++		if (recentLimit >= 0) {
++			const byId = new Map<string, AgentRef & { kind: "main" | "sub" }>();
++			for (const ref of refs) byId.set(ref.id, ref);
++			const include = new Set<string>();
++			const finished: (AgentRef & { kind: "main" | "sub" })[] = [];
++			for (const ref of refs) {
++				if (ref.kind === "main" || ref.status === "running" || ref.status === "idle") include.add(ref.id);
++				else finished.push(ref);
++			}
++			finished.sort((a, b) => b.lastActivity - a.lastActivity);
++			for (const ref of finished.slice(0, recentLimit)) include.add(ref.id);
++			for (const id of include) {
++				let parentId = byId.get(id)?.parentId;
++				while (parentId && !include.has(parentId) && byId.has(parentId)) {
++					include.add(parentId);
++					parentId = byId.get(parentId)?.parentId;
++				}
++			}
++			selected = refs.filter(ref => include.has(ref.id));
++		}
++		return selected.map(ref => ({
++			id: ref.id,
++			displayName: ref.displayName,
++			kind: ref.kind,
++			parentId: ref.parentId,
++			status: ref.status,
++			hasSessionFile: !!ref.sessionFile,
++			createdAt: ref.createdAt,
++			lastActivity: ref.lastActivity,
++		}));
+ 	}
+ 
+ 	#scheduleAgentsBroadcast(): void {
+@@ -1143,7 +1275,12 @@ export class CollabHost {
+ 		if (this.ending || this.#agentsDebounce || this.#peers.size === 0) return;
+ 		this.#agentsDebounce = setTimeout(() => {
+ 			this.#agentsDebounce = null;
+-			this.#send({ t: "agents", agents: this.#snapshotAgents() });
++			const agents = this.#snapshotAgents();
++			const json = JSON.stringify(agents);
++			if (json === this.#lastAgentsJson) return;
++			this.#lastAgentsJson = json;
++			// Superseded rosters still queued behind a slow relay are dropped.
++			this.#send({ t: "agents", agents }, 0, "agents");
+ 		}, AGENTS_DEBOUNCE_MS);
+ 	}
+ 
+@@ -1250,7 +1387,7 @@ export class CollabHost {
+ 			const json = JSON.stringify(state);
+ 			if (json === this.#lastStateJson) return;
+ 			this.#lastStateJson = json;
+-			this.#send({ t: "state", state });
++			this.#send({ t: "state", state }, 0, "state");
+ 		}, STATE_DEBOUNCE_MS);
+ 	}
+ 
+diff --git a/packages/coding-agent/src/collab/relay-client.ts b/packages/coding-agent/src/collab/relay-client.ts
+index 04f6292..8219821 100644
+--- a/packages/coding-agent/src/collab/relay-client.ts
++++ b/packages/coding-agent/src/collab/relay-client.ts
+@@ -57,8 +57,15 @@ export const HOST_RECLAIM_CONFIRM_MS = 1_000;
+ export const RELAY_PING_INTERVAL_MS = 15_000;
+ /** A socket that has heard nothing, not even a pong, for this long is dropped and retried. */
+ export const RELAY_SILENCE_LIMIT_MS = 40_000;
+-const MAX_PENDING_SENDS = 256;
+-const MAX_PENDING_SEND_BYTES = 16 * 1024 * 1024;
++/**
++ * Hard backlog bounds; crossing either ends the room. Live traffic that is a
++ * full snapshot (state, roster, cumulative stream updates, subagent progress)
++ * supersedes its queued predecessor instead of piling up, so these only trip
++ * on genuinely unbounded backlog — not a busy session behind a slow relay or a
++ * guest still draining its join snapshot.
++ */
++const MAX_PENDING_SENDS = 4096;
++const MAX_PENDING_SEND_BYTES = 48 * 1024 * 1024;
+ /**
+  * Settled retirement records kept, as a memory backstop only. Correctness is an
+  * *ordering* obligation, not a count: a record must outlive the frames that were
+@@ -81,6 +88,8 @@ interface PendingSend {
+ 	cancelled: boolean;
+ 	eager: boolean;
+ 	onPrepared?: () => void;
++	/** Live frames with the same key and target supersede each other while queued. */
++	coalesceKey?: string;
+ 	preparedEnvelope?: Uint8Array;
+ 	/** Next batch frame, pulled right after a write so an exhausted batch leaves the head at once. */
+ 	head?: CollabFrame | string;
+@@ -194,19 +203,48 @@ export class CollabSocket {
+ 	 * Queue one frame. An {@link EncodedFrame} is sealed as-is, so a caller that
+ 	 * already serialized the payload (to measure or bound it) does not pay for a
+ 	 * second `JSON.stringify`.
++	 *
++	 * A `coalesceKey` marks the frame as a full snapshot of some live state: any
++	 * frame with the same key and target still waiting in the queue is dropped
++	 * and this one is appended in its place, so a slow relay receives the latest
++	 * state once instead of every intermediate one.
+ 	 */
+-	send(frame: CollabFrame | EncodedFrame, targetPeer = 0): void {
++	send(frame: CollabFrame | EncodedFrame, targetPeer = 0, coalesceKey?: string): void {
+ 		if (this.#closed) return;
+ 		try {
+ 			const serialized = typeof frame === "string" ? frame : JSON.stringify(frame);
++			if (coalesceKey !== undefined) this.#dropSuperseded(coalesceKey, targetPeer);
+ 			const prepared = Promise.withResolvers<void>();
+ 			this.#sendChain = Promise.all([this.#sendChain, prepared.promise]).then(() => {});
+-			this.#enqueueSend([serialized].values(), targetPeer, Buffer.byteLength(serialized), prepared.resolve, true);
++			this.#enqueueSend(
++				[serialized].values(),
++				targetPeer,
++				Buffer.byteLength(serialized),
++				prepared.resolve,
++				true,
++				coalesceKey,
++			);
+ 		} catch (err) {
+ 			this.#failFatal(`could not serialize collab frame: ${String(err)}; rejoin to resync`);
+ 		}
+ 	}
+ 
++	/** Number of queued sends (including an in-flight head); exposed for tests and diagnostics. */
++	get pendingSendCount(): number {
++		return this.#pendingSends.length;
++	}
++
++	/**
++	 * Drop queued frames a newer one with the same key supersedes. The head is
++	 * left alone: it may already be sealed or on its way to the transport.
++	 */
++	#dropSuperseded(coalesceKey: string, targetPeer: number): void {
++		const head = this.#pendingSends[0];
++		this.#discardWhere(
++			pending => pending !== head && pending.coalesceKey === coalesceKey && pending.targetPeer === targetPeer,
++		);
++	}
++
+ 	/**
+ 	 * Keeps a snapshot contiguous with its welcome and ahead of subsequent live
+ 	 * traffic. {@link EncodedFrame} items are sealed as-is, as in {@link send}.
+@@ -278,6 +316,7 @@ export class CollabSocket {
+ 		bytes: number,
+ 		onPrepared?: () => void,
+ 		eager = false,
++		coalesceKey?: string,
+ 	): void {
+ 		// The queue invariant, enforced in one place: targeted work is only ever
+ 		// admitted for a peer still being served. A batch queued for a peer that has
+@@ -294,7 +333,7 @@ export class CollabSocket {
+ 			this.#failOverload();
+ 			return;
+ 		}
+-		this.#pendingSends.push({ frames, targetPeer, bytes, cancelled: false, eager, onPrepared });
++		this.#pendingSends.push({ frames, targetPeer, bytes, cancelled: false, eager, onPrepared, coalesceKey });
+ 		this.#pendingSendBytes += bytes;
+ 		this.#pumpSends();
+ 	}
+diff --git a/packages/coding-agent/src/collab/settings.ts b/packages/coding-agent/src/collab/settings.ts
+index 7118151..1e512ce 100644
+--- a/packages/coding-agent/src/collab/settings.ts
++++ b/packages/coding-agent/src/collab/settings.ts
+@@ -43,6 +43,32 @@ export const cfgCollabDisplayName = register({
+ 	},
+ });
+ 
++export const cfgCollabHistoryEntries = register({
++	id: "collab.historyEntries",
++	type: "number",
++	default: 300,
++	ui: {
++		tab: "interaction",
++		group: "Collab",
++		label: "Join History",
++		description:
++			"Most recent transcript entries sent to a guest when it joins or reconnects (also capped at ~3 MB). Older history stays on the host. 0 sends the full transcript",
++	},
++});
++
++export const cfgCollabRecentAgents = register({
++	id: "collab.recentAgents",
++	type: "number",
++	default: 12,
++	ui: {
++		tab: "interaction",
++		group: "Collab",
++		label: "Recent Finished Agents",
++		description:
++			"Finished (parked/aborted) subagents mirrored to guests next to the live ones, most recent first. Live agents are always shown. -1 mirrors every agent",
++	},
++});
++
+ export const cfgCollabAutoStart = register({
+ 	id: "collab.autoStart",
+ 	type: "enum",
+diff --git a/packages/coding-agent/test/collab/host-history-tail.test.ts b/packages/coding-agent/test/collab/host-history-tail.test.ts
+new file mode 100644
+index 0000000..6e365b6
+--- /dev/null
++++ b/packages/coding-agent/test/collab/host-history-tail.test.ts
+@@ -0,0 +1,228 @@
++/**
++ * Contract: a joining guest receives only the latest history (bounded by
++ * `collab.historyEntries` and a byte budget) re-rooted onto a marker entry,
++ * the mirrored roster carries live agents plus a few recent finished ones
++ * instead of every agent the session ever spawned, and superseded live
++ * frames are coalesced in the host's send queue.
++ */
++import { afterEach, beforeEach, describe, expect, it, spyOn, vi } from "bun:test";
++import { COLLAB_HISTORY_OMITTED_CUSTOM_TYPE, CollabHost } from "@oh-my-pi/pi-coding-agent/collab/host";
++import { type AgentSnapshot, COLLAB_PROTO, type CollabFrame } from "@oh-my-pi/pi-coding-agent/collab/protocol";
++import { CollabSocket } from "@oh-my-pi/pi-coding-agent/collab/relay-client";
++import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
++import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
++import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
++import type { SessionEntry } from "@oh-my-pi/pi-coding-agent/session/session-entries";
++import { installInMemoryRelay, uninstallInMemoryRelay } from "./helpers/in-memory-relay";
++
++function makeCtx(entries: SessionEntry[], overrides: Record<string, unknown> = {}): InteractiveModeContext {
++	const sessionId = `sess-${crypto.randomUUID()}`;
++	return {
++		settings: Settings.isolated(overrides),
++		sessionManager: {
++			getSessionId: () => sessionId,
++			getCwd: () => "/tmp/collab-history-test",
++			snapshotForReplication: () => ({
++				header: { type: "session", id: sessionId, timestamp: "2026-07-20T00:00:00Z", cwd: "/tmp" },
++				entries,
++			}),
++			onEntryAppended: undefined,
++		},
++		session: {
++			isSessionTransitioning: false,
++			isStreaming: false,
++			queuedMessageCount: 0,
++			sessionName: "history-test",
++			model: undefined,
++			thinkingLevel: undefined,
++			subscribe: () => () => {},
++			emitNotice: () => {},
++			promptCustomMessage: () => Promise.resolve(),
++			abort: () => Promise.resolve(),
++		},
++		eventBus: undefined,
++		statusLine: {
++			setCollabStatus: () => {},
++			invalidate: () => {},
++			getCachedContextBreakdown: () => ({ usedTokens: 0, contextWindow: 0 }),
++		},
++		ui: { requestRender: () => {} },
++		showStatus: () => {},
++		collabHost: undefined,
++	} as unknown as InteractiveModeContext;
++}
++
++function chain(count: number, contentBytes = 8): SessionEntry[] {
++	const entries: SessionEntry[] = [];
++	for (let i = 0; i < count; i++) {
++		entries.push({
++			type: "custom_message",
++			id: `e${i}`,
++			parentId: i === 0 ? null : `e${i - 1}`,
++			timestamp: "2026-07-20T00:00:00Z",
++			customType: "note",
++			content: "x".repeat(contentBytes),
++			display: true,
++		} as unknown as SessionEntry);
++	}
++	return entries;
++}
++
++let host: CollabHost | undefined;
++
++beforeEach(() => {
++	AgentRegistry.resetGlobalForTests();
++	installInMemoryRelay();
++	host = undefined;
++});
++
++afterEach(async () => {
++	vi.useRealTimers();
++	if (host) await host.stop("test cleanup").catch(() => {});
++	uninstallInMemoryRelay();
++	AgentRegistry.resetGlobalForTests();
++});
++
++async function startHost(ctx: InteractiveModeContext): Promise<CollabSocket> {
++	const originalConnect = CollabSocket.prototype.connect;
++	let transport: CollabSocket | undefined;
++	const capture = spyOn(CollabSocket.prototype, "connect").mockImplementation(function (this: CollabSocket) {
++		transport = this;
++		return originalConnect.call(this);
++	});
++	host = new CollabHost(ctx);
++	try {
++		await host.start("ws://localhost:8788");
++	} finally {
++		capture.mockRestore();
++	}
++	if (!transport) throw new Error("host transport missing");
++	return transport;
++}
++
++/** Join one guest and return the welcome plus every entry of its snapshot train. */
++function join(transport: CollabSocket): { welcome: Extract<CollabFrame, { t: "welcome" }>; entries: SessionEntry[] } {
++	const send = spyOn(transport, "send").mockImplementation(() => {});
++	const batch = spyOn(transport, "sendBatch").mockImplementation(() => {});
++	transport.onFrame!({ t: "hello", proto: COLLAB_PROTO, name: "guest" }, 1);
++	const welcome = send.mock.calls
++		.map(([frame]) => frame)
++		.find(frame => typeof frame !== "string" && frame.t === "welcome");
++	if (!welcome || typeof welcome === "string" || welcome.t !== "welcome") throw new Error("no welcome sent");
++	const entries: SessionEntry[] = [];
++	for (const [frames] of batch.mock.calls) {
++		for (const frame of frames) {
++			const parsed = (typeof frame === "string" ? JSON.parse(frame) : frame) as CollabFrame;
++			if (parsed.t === "snapshot-chunk") entries.push(...(parsed.entries as SessionEntry[]));
++		}
++	}
++	send.mockRestore();
++	batch.mockRestore();
++	return { welcome, entries };
++}
++
++describe("collab join history", () => {
++	it("sends only the latest entries, re-rooted onto an omitted-history marker", async () => {
++		const transport = await startHost(makeCtx(chain(1000), { "collab.historyEntries": 300 }));
++		const { welcome, entries } = join(transport);
++		expect(entries).toHaveLength(301);
++		expect(welcome.entryCount).toBe(301);
++		const [marker, first] = entries;
++		expect(marker?.type).toBe("custom_message");
++		expect(marker && "customType" in marker ? marker.customType : undefined).toBe(COLLAB_HISTORY_OMITTED_CUSTOM_TYPE);
++		expect(marker?.parentId).toBeNull();
++		expect(first?.id).toBe("e700");
++		expect(first?.parentId).toBe(marker?.id);
++		expect(entries.at(-1)?.id).toBe("e999");
++		// Only the orphaned entry is rewritten; the rest keep their chain.
++		expect(entries[2]?.parentId).toBe("e700");
++	});
++
++	it("trims the tail further to the byte budget but always keeps the latest entry", async () => {
++		// 64 KiB entries: ~48 fit in the 3 MiB budget.
++		const transport = await startHost(makeCtx(chain(200, 64 * 1024), { "collab.historyEntries": 200 }));
++		const { entries } = join(transport);
++		expect(entries.length).toBeGreaterThan(10);
++		expect(entries.length).toBeLessThan(60);
++		expect(entries.at(-1)?.id).toBe("e199");
++	});
++
++	it("sends the full transcript without a marker when the limit is 0 or not reached", async () => {
++		const full = await startHost(makeCtx(chain(50), { "collab.historyEntries": 0 }));
++		expect(join(full).entries.map(entry => entry.id)).toEqual(chain(50).map(entry => entry.id));
++		await host?.stop("next");
++		const small = await startHost(makeCtx(chain(50)));
++		expect(join(small).entries).toHaveLength(50);
++	});
++});
++
++describe("collab agent roster", () => {
++	it("mirrors live agents, the most recent finished ones, and their ancestors", async () => {
++		const registry = AgentRegistry.global();
++		registry.register({ id: "0-Main", displayName: "main", kind: "main", session: null, status: "running" });
++		for (let i = 0; i < 4000; i++) {
++			registry.register({
++				id: `old-${i}`,
++				displayName: `old ${i}`,
++				kind: "sub",
++				parentId: "0-Main",
++				session: null,
++				status: "parked",
++				lastActivity: 1_000 + i,
++			});
++		}
++		// A live grandchild whose parked parent is far older than the recent window.
++		registry.register({
++			id: "live",
++			displayName: "live",
++			kind: "sub",
++			parentId: "old-3",
++			session: null,
++			status: "running",
++		});
++		registry.register({
++			id: "waiting",
++			displayName: "idle",
++			kind: "sub",
++			parentId: "0-Main",
++			session: null,
++			status: "idle",
++		});
++		const transport = await startHost(makeCtx([], { "collab.recentAgents": 5 }));
++		const ids = new Set(join(transport).welcome.agents.map((agent: AgentSnapshot) => agent.id));
++		expect(ids.has("0-Main")).toBe(true);
++		expect(ids.has("live")).toBe(true);
++		expect(ids.has("waiting")).toBe(true);
++		expect(ids.has("old-3")).toBe(true);
++		for (let i = 3995; i < 4000; i++) expect(ids.has(`old-${i}`)).toBe(true);
++		expect(ids.has("old-3994")).toBe(false);
++		expect(ids.size).toBe(9);
++	});
++
++	it("mirrors every agent when recentAgents is -1", async () => {
++		const registry = AgentRegistry.global();
++		for (let i = 0; i < 30; i++) {
++			registry.register({ id: `a${i}`, displayName: `a${i}`, kind: "sub", session: null, status: "aborted" });
++		}
++		const transport = await startHost(makeCtx([], { "collab.recentAgents": -1 }));
++		expect(join(transport).welcome.agents).toHaveLength(30);
++	});
++});
++
++describe("collab send coalescing", () => {
++	it("replaces a queued frame with the same key instead of queueing both", async () => {
++		const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
++		const socket = new CollabSocket({ wsUrl: "ws://localhost:8788/r/coalesce", role: "host", key });
++		// Never connected: everything stays queued.
++		socket.send({ t: "error", message: "head" });
++		socket.send({ t: "state", state: {} as never }, 0, "state");
++		socket.send({ t: "error", message: "between" });
++		socket.send({ t: "state", state: {} as never }, 0, "state");
++		socket.send({ t: "state", state: {} as never }, 0, "state");
++		expect(socket.pendingSendCount).toBe(3);
++		// A different target is a different stream.
++		socket.send({ t: "state", state: {} as never }, 2, "state");
++		expect(socket.pendingSendCount).toBe(4);
++		socket.close();
++	});
++});
+diff --git a/packages/coding-agent/test/collab/relay-client-backpressure.test.ts b/packages/coding-agent/test/collab/relay-client-backpressure.test.ts
+index 1412def..c6f0e20 100644
+--- a/packages/coding-agent/test/collab/relay-client-backpressure.test.ts
++++ b/packages/coding-agent/test/collab/relay-client-backpressure.test.ts
+@@ -103,7 +103,7 @@ describe("CollabSocket send backpressure", () => {
+ 			socket.connect();
+ 			const ws = BackpressuredWebSocket.instances[0]!;
+ 			ws.open();
+-			for (let i = 0; i < 300; i++) socket.send({ t: "prompt", text: `effect ${i}` });
++			for (let i = 0; i < 4200; i++) socket.send({ t: "prompt", text: `effect ${i}` });
+ 			const result = await Promise.race([closed.promise, Bun.sleep(250).then(() => undefined)]);
+ 			expect(result).toMatchObject({ reconnect: false });
+ 			expect(result?.reason).toContain("resync");
+@@ -477,7 +477,7 @@ describe("CollabSocket send backpressure", () => {
+ 		try {
+ 			socket.connect();
+ 			BackpressuredWebSocket.instances[0]!.open();
+-			const text = "x".repeat(9 * 1024 * 1024);
++			const text = "x".repeat(25 * 1024 * 1024);
+ 			socket.send({ t: "prompt", text });
+ 			socket.send({ t: "prompt", text });
+ 			expect(reason).toContain("backlog exceeded");

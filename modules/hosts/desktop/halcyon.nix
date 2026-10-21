@@ -60,6 +60,15 @@ in
         self.nixosModules.nix
       ];
 
+      # Extra disk-backed capacity for concurrent builds; keep zram preferred.
+      swapDevices = [
+        {
+          device = "/swapfile";
+          size = 64 * 1024; # MiB (64 GiB)
+          priority = 1;
+        }
+      ];
+
       nixos = {
         # hardware.bluetooth = {
         #   enable = true;
@@ -70,5 +79,23 @@ in
           kernel = "performance";
         };
       };
+
+      # Encode on the RX 7900 XTX (renderD129 is the integrated GPU).
+      services.helios.settings.adapter_name = "/dev/dri/renderD128";
+
+      # Second NVMe (NE-512, 476.9 GB): scratch for Jet dev build artifacts.
+      # nofail: the system still boots if the drive is missing or unformatted.
+      fileSystems."/mnt/jetscratch" = {
+        device = "/dev/disk/by-label/jetscratch";
+        fsType = "ext4";
+        options = [
+          "noatime"
+          "nofail"
+          "x-systemd.device-timeout=5s"
+        ];
+      };
+      systemd.tmpfiles.rules = [ "d /mnt/jetscratch 0755 nate users -" ];
+      # Jet dev: off-drive cargo targets, candidates and scratch (Tools/agent/jet-env).
+      environment.variables.JET_SCRATCH_ROOT = "/mnt/jetscratch";
     };
 }

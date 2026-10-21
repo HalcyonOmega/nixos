@@ -1,0 +1,12 @@
+providers:
+  anthropic:
+    modelOverrides:
+      # Selecting Opus 5.5 (or spawning an agent on it without a `:level`
+      # suffix) starts at high instead of inheriting the previous model's max.
+      # The override replaces the catalog thinking block, so keep its shape.
+      claude-opus-5-5:
+        thinking:
+          mode: anthropic-adaptive
+          efforts: [low, medium, high, xhigh, max]
+          supportsDisplay: true
+          defaultLevel: high
