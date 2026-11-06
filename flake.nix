@@ -84,6 +84,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Hermod: Gmail/iCloud mail client. Bump: `nix flake update hermod`.
+    hermod = {
+      url = "git+file:///home/nate/Projects/Github/Hermod";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
     codex-desktop-linux = {
       url = "github:ilysenko/codex-desktop-linux";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

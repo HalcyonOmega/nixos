@@ -16,6 +16,7 @@
         terminal = [ "ghostty.desktop" ];
         archive = [ "ark.desktop" ];
         discord = [ "discord.desktop" ];
+        mail = [ "hermod.desktop" ];
       };
 
       mimeMap = {
@@ -89,6 +90,7 @@
           "application/*tar"
         ];
         discord = [ "x-scheme-handler/discord" ];
+        mail = [ "x-scheme-handler/mailto" ];
       };
 
       associations =

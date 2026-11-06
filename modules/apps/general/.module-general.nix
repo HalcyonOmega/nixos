@@ -8,6 +8,7 @@
         self.nixosModules.discord
         self.nixosModules.element
         self.nixosModules.handy
+        self.nixosModules.hermod
         # self.nixosModules.logseq
         self.nixosModules.onlyoffice
         # self.nixosModules.spicetify
