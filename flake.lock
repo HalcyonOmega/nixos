@@ -677,11 +677,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793966761,
-        "narHash": "sha256-1zXjshNDDvWsmdN8Q59A09QID0MQxALyarCTGyeymQE=",
+        "lastModified": 1793979266,
+        "narHash": "sha256-3ltvQ8x4ctWyhQ78pGxoiLhtzN++S0dfqGWKZk6nUlU=",
         "ref": "refs/heads/main",
-        "rev": "c4575a18d533387d8d8e807b6d24e6d975d191a5",
-        "revCount": 4,
+        "rev": "de9d6ea18acb2452541580b570dc368ca8d897dc",
+        "revCount": 5,
         "type": "git",
         "url": "file:///home/nate/Projects/Github/Hermod"
       },
