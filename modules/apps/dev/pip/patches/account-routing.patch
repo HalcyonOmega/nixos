@@ -1,5 +1,5 @@
 diff --git a/packages/ai/src/auth/rank.ts b/packages/ai/src/auth/rank.ts
-index 59dffc0..43370e8 100644
+index 89b80c1..7207515 100644
 --- a/packages/ai/src/auth/rank.ts
 +++ b/packages/ai/src/auth/rank.ts
 @@ -52,9 +52,12 @@ export type UsageRankedCandidate<T extends AuthCredential> = UsageCandidate<T> &
@@ -32,7 +32,7 @@ index 59dffc0..43370e8 100644
  
  /** Rank accounts by model-plan eligibility when a plan gate applies. */
  export function planPriority(gate: PlanGate | undefined, report: UsageReport | null): number {
-@@ -104,34 +103,26 @@ function compareUsageRankedCandidatePriority(
+@@ -104,36 +103,28 @@ function compareUsageRankedCandidatePriority(
  	// allowance yields to any sibling whose renewable allowance is left (#13889).
  	if (left.allowanceSpent !== right.allowanceSpent) return left.allowanceSpent ? 1 : -1;
  	if (left.inReserve !== right.inReserve) return left.inReserve ? 1 : -1;
@@ -43,16 +43,18 @@ index 59dffc0..43370e8 100644
 -	const leftHot = left.primaryUsed >= PRIMARY_WINDOW_HOT_FRACTION;
 -	const rightHot = right.primaryUsed >= PRIMARY_WINDOW_HOT_FRACTION;
 -	if (leftHot !== rightHot) return leftHot ? 1 : -1;
--	// Usage-backed candidates outrank unmeasured ones: required-drain
--	// scores are only comparable between measured windows, and the
--	// clockless headroom fallback (0..1) must not let an account whose
+ 	// Configured priority is the user's order; a failed usage fetch says nothing
+ 	// about it, so it ranks ahead of measurement.
+ 	if (left.accountPriority !== right.accountPriority) return right.accountPriority - left.accountPriority;
+-	// Within a priority, usage-backed candidates outrank unmeasured ones:
+-	// required-drain scores are only comparable between measured windows, and
+-	// the clockless headroom fallback (0..1) must not let an account whose
 -	// usage fetch failed shadow a measured sibling.
-+	// Usage-backed candidates outrank unmeasured ones: an account whose usage
-+	// fetch failed must not shadow a measured sibling.
++	// Within a priority, usage-backed candidates outrank unmeasured ones: an
++	// account whose usage fetch failed must not shadow a measured sibling.
  	const leftMeasured = left.usageMeasured;
  	const rightMeasured = right.usageMeasured;
  	if (leftMeasured !== rightMeasured) return leftMeasured ? -1 : 1;
- 	if (left.accountPriority !== right.accountPriority) return right.accountPriority - left.accountPriority;
 -	// Required drain, descending: the account whose remaining quota must
 -	// burn fastest to avoid expiring unused at its reset comes first, so
 -	// staggered resets land at ~100% utilization instead of stranding
@@ -82,7 +84,7 @@ index 59dffc0..43370e8 100644
  }
  
  function compareUsageRankedCandidates(
-@@ -143,7 +134,7 @@ function compareUsageRankedCandidates(
+@@ -145,7 +136,7 @@ function compareUsageRankedCandidates(
  	return priority !== 0 ? priority : left.orderPos - right.orderPos;
  }
  
@@ -92,10 +94,10 @@ index 59dffc0..43370e8 100644
  	candidates: UsageRankedCandidate<T>[],
  	planGated: boolean,
 diff --git a/packages/ai/src/auth/select.ts b/packages/ai/src/auth/select.ts
-index 4d0ccd5..02abcbd 100644
+index 4bab440..0905562 100644
 --- a/packages/ai/src/auth/select.ts
 +++ b/packages/ai/src/auth/select.ts
-@@ -44,7 +44,7 @@ import {
+@@ -45,7 +45,7 @@ import {
  	remainingUsageFraction,
  	scopedUsageLimits,
  	usageResetAtMs,
@@ -104,7 +106,7 @@ index 4d0ccd5..02abcbd 100644
  } from "./usage-report";
  
  /** Temporary block after a transient OAuth refresh failure. */
-@@ -288,9 +288,8 @@ export class CredentialSelector {
+@@ -289,9 +289,8 @@ export class CredentialSelector {
  				hasPriorityBoost: strategy.hasPriorityBoost?.(primary, primaryUncapped, args.rankingContext) ?? false,
  				planPriority: 0,
  				secondaryUsed: normalizeUsageFraction(secondary),
@@ -115,7 +117,7 @@ index 4d0ccd5..02abcbd 100644
  				orderPos,
  			});
  		}
-@@ -498,11 +497,11 @@ export class CredentialSelector {
+@@ -545,11 +544,11 @@ export class CredentialSelector {
  				hasPriorityBoost: strategy?.hasPriorityBoost?.(primary, primaryUncapped, args.rankingContext) ?? false,
  				planPriority: planPriority(args.planGate, usage),
  				secondaryUsed: strategy ? normalizeUsageFraction(secondary) : 0,
@@ -131,8 +133,8 @@ index 4d0ccd5..02abcbd 100644
  				orderPos,
  			});
  		}
-@@ -581,51 +580,12 @@ export class CredentialSelector {
- 			(strategy !== undefined || policyReserveEnabled) && (credentials.length > 1 || hasPlanRequirement);
+@@ -627,51 +626,12 @@ export class CredentialSelector {
+ 		);
  		const sessionCredential = this.#deps.affinity.get(provider, sessionId);
  		const sessionPreferredIndex = sessionCredential?.type === "oauth" ? sessionCredential.index : undefined;
 -		const sessionPreferredCredential =
@@ -188,7 +190,7 @@ index 4d0ccd5..02abcbd 100644
  		// When ranking, seed the pinned credential first in the evaluation order so it wins genuine
  		// ties (the ranked comparator falls back to `orderPos`) without overriding a strictly-better
  		// sibling — this respects the residual value of a same-account shared static prefix that other
-@@ -668,11 +628,7 @@ export class CredentialSelector {
+@@ -714,11 +674,7 @@ export class CredentialSelector {
  			: policyOrder
  					.map(idx => credentials[idx])
  					.filter((selection): selection is { credential: OAuthCredential; index: number } => Boolean(selection))
@@ -201,7 +203,7 @@ index 4d0ccd5..02abcbd 100644
  		// Keep the candidate object: preflight may rebind its positional index
  		// after a peer changes the credential pool.
  		const explicitPin = sessionPinIsExplicit
-@@ -693,50 +649,7 @@ export class CredentialSelector {
+@@ -739,50 +695,7 @@ export class CredentialSelector {
  				!this.#deps.blocks.isBlocked(provider, providerKey, candidate.selection.index, blockScopes) &&
  				candidate.selection.index === sessionPreferredIndex,
  		);
@@ -253,7 +255,7 @@ index 4d0ccd5..02abcbd 100644
  			const [preferred] = candidates.splice(sessionPreferredCandidate, 1);
  			candidates.unshift(preferred);
  		}
-@@ -872,36 +785,17 @@ export class CredentialSelector {
+@@ -924,36 +837,17 @@ export class CredentialSelector {
  			}),
  		);
  
@@ -414,10 +416,10 @@ index 2cf4fa9..eeb9881 100644
 -	});
  });
 diff --git a/packages/ai/test/auth-storage-codex-selection.test.ts b/packages/ai/test/auth-storage-codex-selection.test.ts
-index baca667..9edf262 100644
+index 586d507..0b9e01f 100644
 --- a/packages/ai/test/auth-storage-codex-selection.test.ts
 +++ b/packages/ai/test/auth-storage-codex-selection.test.ts
-@@ -925,126 +925,6 @@ describe("AuthStorage codex oauth ranking", () => {
+@@ -951,126 +951,6 @@ describe("AuthStorage codex oauth ranking", () => {
  		expect(health.accounts[0]?.remainingFraction).toBeCloseTo(0.05);
  	});
  
@@ -544,7 +546,7 @@ index baca667..9edf262 100644
  	test("keeps an explicit user pin authoritative over reserve", async () => {
  		if (!store) throw new Error("test setup failed");
  		authStorage = new AuthStorage(store, {
-@@ -1216,7 +1096,7 @@ describe("AuthStorage codex oauth ranking", () => {
+@@ -1242,7 +1122,7 @@ describe("AuthStorage codex oauth ranking", () => {
  		expect(await authStorage.keys.get("openai-codex", "single-unknown-reserve")).toBe("api-acct-only");
  	});
  
@@ -553,7 +555,7 @@ index baca667..9edf262 100644
  		if (!authStorage) throw new Error("test setup failed");
  		const storage = authStorage;
  
-@@ -1251,11 +1131,11 @@ describe("AuthStorage codex oauth ranking", () => {
+@@ -1277,11 +1157,11 @@ describe("AuthStorage codex oauth ranking", () => {
  		setUsage(0.2, 0.9);
  		expect(await storage.keys.get("openai-codex", "codex-idle-boundary")).toBe("api-acct-pinned");
  
@@ -569,7 +571,7 @@ index baca667..9edf262 100644
  	});
  
  	test("prefers fresh 5h ticker account at 0% usage", async () => {
-@@ -2901,7 +2781,7 @@ describe("AuthStorage codex oauth ranking", () => {
+@@ -2927,7 +2807,7 @@ describe("AuthStorage codex oauth ranking", () => {
  		},
  	);
  
@@ -578,7 +580,7 @@ index baca667..9edf262 100644
  		if (!authStorage) throw new Error("test setup failed");
  
  		const modelId = "gpt-5.6-sol";
-@@ -2955,7 +2835,7 @@ describe("AuthStorage codex oauth ranking", () => {
+@@ -2981,7 +2861,7 @@ describe("AuthStorage codex oauth ranking", () => {
  		// inverted headroom instead of ranking on the cached first-resolve reports
  		// (mirrors mid-session header ingest / TTL expiry in a real session).
  		clockOffset = 10 * 60 * 1000;
@@ -587,7 +589,7 @@ index baca667..9edf262 100644
  	});
  
  	test("reranks a Terra session on a Go account when it switches to Sol", async () => {
-@@ -3316,7 +3196,7 @@ describe("AuthStorage codex oauth ranking", () => {
+@@ -3342,7 +3222,7 @@ describe("AuthStorage codex oauth ranking", () => {
  		expect(elapsedMs).toBeLessThan(1_000);
  	});
  
@@ -596,7 +598,7 @@ index baca667..9edf262 100644
  		if (!authStorage) throw new Error("test setup failed");
  
  		await authStorage.credentials.set("openai-codex", [
-@@ -3351,8 +3231,8 @@ describe("AuthStorage codex oauth ranking", () => {
+@@ -3377,8 +3257,8 @@ describe("AuthStorage codex oauth ranking", () => {
  		);
  
  		const counts = await countApiKeySelections(authStorage, "openai-codex", "weighted-codex-three");
@@ -607,7 +609,7 @@ index baca667..9edf262 100644
  	});
  
  	test("handles usage fetch failure gracefully (null report)", async () => {
-@@ -4235,7 +4115,7 @@ describe("AuthStorage claude oauth ranking", () => {
+@@ -4261,7 +4141,7 @@ describe("AuthStorage claude oauth ranking", () => {
  		expectExclusivePreference(counts, "api-acct-best", "api-acct-base-b");
  	});
  
@@ -616,7 +618,7 @@ index baca667..9edf262 100644
  		if (!authStorage) throw new Error("test setup failed");
  
  		await authStorage.credentials.set("anthropic", [
-@@ -4243,9 +4123,8 @@ describe("AuthStorage claude oauth ranking", () => {
+@@ -4269,9 +4149,8 @@ describe("AuthStorage claude oauth ranking", () => {
  			{ type: "oauth", ...createCredential("acct-cool", "cool@example.com") },
  		]);
  
@@ -628,7 +630,7 @@ index baca667..9edf262 100644
  		usageByAccount.set(
  			"acct-urgent-hot",
  			createClaudeUsageReport({
-@@ -4264,7 +4143,7 @@ describe("AuthStorage claude oauth ranking", () => {
+@@ -4290,7 +4169,7 @@ describe("AuthStorage claude oauth ranking", () => {
  		);
  
  		const counts = await countApiKeySelections(authStorage, "anthropic", "claude-hot-guard", 100);
@@ -637,7 +639,7 @@ index baca667..9edf262 100644
  	});
  
  	test("skips exhausted account and picks healthy", async () => {
-@@ -4296,6 +4175,58 @@ describe("AuthStorage claude oauth ranking", () => {
+@@ -4322,6 +4201,58 @@ describe("AuthStorage claude oauth ranking", () => {
  		expect(apiKey).toBe("api-acct-healthy");
  	});
  
@@ -696,7 +698,7 @@ index baca667..9edf262 100644
  	test("falls back to earliest-unblocking when all exhausted", async () => {
  		if (!authStorage) throw new Error("test setup failed");
  
-@@ -4325,7 +4256,7 @@ describe("AuthStorage claude oauth ranking", () => {
+@@ -4351,7 +4282,7 @@ describe("AuthStorage claude oauth ranking", () => {
  		expect(apiKey).toBe("api-acct-soon");
  	});
  
@@ -705,7 +707,7 @@ index baca667..9edf262 100644
  		if (!authStorage) throw new Error("test setup failed");
  
  		await authStorage.credentials.set("anthropic", [
-@@ -4360,8 +4291,8 @@ describe("AuthStorage claude oauth ranking", () => {
+@@ -4386,8 +4317,8 @@ describe("AuthStorage claude oauth ranking", () => {
  		);
  
  		const counts = await countApiKeySelections(authStorage, "anthropic", "weighted-claude-three");
@@ -716,7 +718,7 @@ index baca667..9edf262 100644
  	});
  
  	test("selects the account with lower Fable weekly usage for Claude Fable requests", async () => {
-@@ -4395,7 +4326,7 @@ describe("AuthStorage claude oauth ranking", () => {
+@@ -4421,7 +4352,7 @@ describe("AuthStorage claude oauth ranking", () => {
  		expect(apiKey).toBe("api-acct-b");
  	});
  
@@ -725,7 +727,7 @@ index baca667..9edf262 100644
  		if (!authStorage) throw new Error("test setup failed");
  		const storage = authStorage;
  
-@@ -4435,14 +4366,8 @@ describe("AuthStorage claude oauth ranking", () => {
+@@ -4461,14 +4392,8 @@ describe("AuthStorage claude oauth ranking", () => {
  		// The tables turn: acct-pinned's 5h window is now hot, acct-fresh is cool.
  		setUsage(0.9, 0.2);
  

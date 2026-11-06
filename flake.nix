@@ -116,7 +116,7 @@
     };
 
     oh-my-pi = {
-      url = "github:can1357/oh-my-pi/v18.12.5";
+      url = "github:can1357/oh-my-pi/v18.15.0";
     };
   };
 

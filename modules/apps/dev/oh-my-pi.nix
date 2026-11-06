@@ -4,7 +4,7 @@
     { pkgs, username, ... }:
     let
       # Built from the upstream source tag pinned by the `oh-my-pi` flake input
-      # (currently v18.12.5) so the local patches below apply.
+      # (currently v18.15.0) so the local patches below apply.
       upstream = inputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.default;
       package = upstream.overrideAttrs (old: {
         patches = (old.patches or [ ]) ++ [

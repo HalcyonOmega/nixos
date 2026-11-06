@@ -68,7 +68,7 @@ index f0301e5..7e37086 100644
  					}),
  				);
  			}
-@@ -674,12 +701,12 @@ export class CollabHost {
+@@ -674,12 +701,13 @@ export class CollabHost {
  	 * final goodbye. Pre-serialized broadcasts gate on {@link #broadcastAllowed},
  	 * which applies the same liveness/session checks.
  	 */
@@ -79,25 +79,16 @@ index f0301e5..7e37086 100644
  		// provisional /resume that later rolls back. All other traffic stays gated.
  		if (this.ending || (!this.#sessionStillCurrent() && frame.t !== "ui-request-end")) return;
 -		this.#socket?.send(frame, toPeer);
-+		this.#socket?.send(frame, toPeer, coalesceKey);
++		if (coalesceKey !== undefined && toPeer === 0) this.#socket?.sendLatest(coalesceKey, frame);
++		else this.#socket?.send(frame, toPeer);
  	}
  
  	/**
-@@ -696,7 +723,16 @@ export class CollabHost {
- 	/** Broadcast one session event, bounded and serialized exactly once. */
- 	#broadcastEvent(event: AgentSessionEvent): void {
- 		if (!this.#broadcastAllowed()) return;
--		this.#socket?.send(encodeEventFrame(serializeReplicatedEvent(event).json));
-+		// `message_update` carries the cumulative message and tool updates carry
-+		// the latest partial result, so a newer one supersedes any still queued:
-+		// a slow relay then sees one frame per stream instead of one per token.
-+		const coalesceKey =
-+			event.type === "message_update"
-+				? "event:message_update"
-+				: event.type === "tool_execution_update"
-+					? `event:tool_update:${event.toolCallId}`
-+					: undefined;
-+		this.#socket?.send(encodeEventFrame(serializeReplicatedEvent(event).json), 0, coalesceKey);
+@@ -723,4 +751,6 @@
+-		else this.#socket?.send(frame);
++		else if (event.type === "tool_execution_update")
++			this.#socket?.sendLatest(`tool_execution_update:${event.toolCallId}`, frame);
++		else this.#socket?.send(frame);
  	}
  
  	#handleFrame(frame: CollabFrame, fromPeer: number): void {
@@ -307,83 +298,6 @@ index 04f6292..8219821 100644
  /**
   * Settled retirement records kept, as a memory backstop only. Correctness is an
   * *ordering* obligation, not a count: a record must outlive the frames that were
-@@ -81,6 +88,8 @@ interface PendingSend {
- 	cancelled: boolean;
- 	eager: boolean;
- 	onPrepared?: () => void;
-+	/** Live frames with the same key and target supersede each other while queued. */
-+	coalesceKey?: string;
- 	preparedEnvelope?: Uint8Array;
- 	/** Next batch frame, pulled right after a write so an exhausted batch leaves the head at once. */
- 	head?: CollabFrame | string;
-@@ -194,19 +203,48 @@ export class CollabSocket {
- 	 * Queue one frame. An {@link EncodedFrame} is sealed as-is, so a caller that
- 	 * already serialized the payload (to measure or bound it) does not pay for a
- 	 * second `JSON.stringify`.
-+	 *
-+	 * A `coalesceKey` marks the frame as a full snapshot of some live state: any
-+	 * frame with the same key and target still waiting in the queue is dropped
-+	 * and this one is appended in its place, so a slow relay receives the latest
-+	 * state once instead of every intermediate one.
- 	 */
--	send(frame: CollabFrame | EncodedFrame, targetPeer = 0): void {
-+	send(frame: CollabFrame | EncodedFrame, targetPeer = 0, coalesceKey?: string): void {
- 		if (this.#closed) return;
- 		try {
- 			const serialized = typeof frame === "string" ? frame : JSON.stringify(frame);
-+			if (coalesceKey !== undefined) this.#dropSuperseded(coalesceKey, targetPeer);
- 			const prepared = Promise.withResolvers<void>();
- 			this.#sendChain = Promise.all([this.#sendChain, prepared.promise]).then(() => {});
--			this.#enqueueSend([serialized].values(), targetPeer, Buffer.byteLength(serialized), prepared.resolve, true);
-+			this.#enqueueSend(
-+				[serialized].values(),
-+				targetPeer,
-+				Buffer.byteLength(serialized),
-+				prepared.resolve,
-+				true,
-+				coalesceKey,
-+			);
- 		} catch (err) {
- 			this.#failFatal(`could not serialize collab frame: ${String(err)}; rejoin to resync`);
- 		}
- 	}
- 
-+	/** Number of queued sends (including an in-flight head); exposed for tests and diagnostics. */
-+	get pendingSendCount(): number {
-+		return this.#pendingSends.length;
-+	}
-+
-+	/**
-+	 * Drop queued frames a newer one with the same key supersedes. The head is
-+	 * left alone: it may already be sealed or on its way to the transport.
-+	 */
-+	#dropSuperseded(coalesceKey: string, targetPeer: number): void {
-+		const head = this.#pendingSends[0];
-+		this.#discardWhere(
-+			pending => pending !== head && pending.coalesceKey === coalesceKey && pending.targetPeer === targetPeer,
-+		);
-+	}
-+
- 	/**
- 	 * Keeps a snapshot contiguous with its welcome and ahead of subsequent live
- 	 * traffic. {@link EncodedFrame} items are sealed as-is, as in {@link send}.
-@@ -278,6 +316,7 @@ export class CollabSocket {
- 		bytes: number,
- 		onPrepared?: () => void,
- 		eager = false,
-+		coalesceKey?: string,
- 	): void {
- 		// The queue invariant, enforced in one place: targeted work is only ever
- 		// admitted for a peer still being served. A batch queued for a peer that has
-@@ -294,7 +333,7 @@ export class CollabSocket {
- 			this.#failOverload();
- 			return;
- 		}
--		this.#pendingSends.push({ frames, targetPeer, bytes, cancelled: false, eager, onPrepared });
-+		this.#pendingSends.push({ frames, targetPeer, bytes, cancelled: false, eager, onPrepared, coalesceKey });
- 		this.#pendingSendBytes += bytes;
- 		this.#pumpSends();
- 	}
 diff --git a/packages/coding-agent/src/collab/settings.ts b/packages/coding-agent/src/collab/settings.ts
 index 7118151..1e512ce 100644
 --- a/packages/coding-agent/src/collab/settings.ts
@@ -426,7 +340,7 @@ new file mode 100644
 index 0000000..6e365b6
 --- /dev/null
 +++ b/packages/coding-agent/test/collab/host-history-tail.test.ts
-@@ -0,0 +1,228 @@
+@@ -0,0 +1,210 @@
 +/**
 + * Contract: a joining guest receives only the latest history (bounded by
 + * `collab.historyEntries` and a byte budget) re-rooted onto a marker entry,
@@ -437,7 +351,6 @@ index 0000000..6e365b6
 +import { afterEach, beforeEach, describe, expect, it, spyOn, vi } from "bun:test";
 +import { COLLAB_HISTORY_OMITTED_CUSTOM_TYPE, CollabHost } from "@oh-my-pi/pi-coding-agent/collab/host";
 +import { type AgentSnapshot, COLLAB_PROTO, type CollabFrame } from "@oh-my-pi/pi-coding-agent/collab/protocol";
-+import { CollabSocket } from "@oh-my-pi/pi-coding-agent/collab/relay-client";
 +import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 +import type { InteractiveModeContext } from "@oh-my-pi/pi-coding-agent/modes/types";
 +import { AgentRegistry } from "@oh-my-pi/pi-coding-agent/registry/agent-registry";
@@ -638,23 +551,6 @@ index 0000000..6e365b6
 +	});
 +});
 +
-+describe("collab send coalescing", () => {
-+	it("replaces a queued frame with the same key instead of queueing both", async () => {
-+		const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-+		const socket = new CollabSocket({ wsUrl: "ws://localhost:8788/r/coalesce", role: "host", key });
-+		// Never connected: everything stays queued.
-+		socket.send({ t: "error", message: "head" });
-+		socket.send({ t: "state", state: {} as never }, 0, "state");
-+		socket.send({ t: "error", message: "between" });
-+		socket.send({ t: "state", state: {} as never }, 0, "state");
-+		socket.send({ t: "state", state: {} as never }, 0, "state");
-+		expect(socket.pendingSendCount).toBe(3);
-+		// A different target is a different stream.
-+		socket.send({ t: "state", state: {} as never }, 2, "state");
-+		expect(socket.pendingSendCount).toBe(4);
-+		socket.close();
-+	});
-+});
 diff --git a/packages/coding-agent/test/collab/relay-client-backpressure.test.ts b/packages/coding-agent/test/collab/relay-client-backpressure.test.ts
 index 1412def..c6f0e20 100644
 --- a/packages/coding-agent/test/collab/relay-client-backpressure.test.ts
